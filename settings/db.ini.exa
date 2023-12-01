@@ -1,0 +1,42 @@
+[db]
+db-driver = mysql
+db-conn-name = default
+db-conn-min = 30
+db-conn-max = 150
+db-conn-queue = true
+
+[default]
+username = root
+password = zces@1234
+host = 127.0.0.1
+port = 3307
+database = upgrader
+charset = utf8mb4
+
+[postgresql]
+host = 127.0.0.1
+port = 5432
+username = postgres
+database = upgrader
+password = zces@1234
+ssl_mode = disable
+
+[mssql]
+username = sa
+password = JW087073yjz..
+host = "127.0.0.1"
+port = 1433
+database = Dwqcgl
+
+[redis]
+host = 127.0.0.1
+port = 6379
+database = 0
+password = zces@1234
+
+[mongo]
+username = "root"
+password = "zces@1234"
+host = "127.0.0.1"
+port = 27017
+database = admin

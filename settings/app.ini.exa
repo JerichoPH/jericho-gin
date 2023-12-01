@@ -1,0 +1,36 @@
+[app]
+name = "jericho-gin"
+logo =
+production = true
+timezone = Asia/Shanghai
+default-limit = 1000
+version="v0.0.1"
+sub-version = ""
+[web-service]
+addr = ":18080"
+[tcp-server-service]
+enable = false
+addr = "0.0.0.0:18081"
+[tcp-client-service]
+enable = false
+addr = "127.0.0.1:18081"
+[rabbit-mq-service]
+enable = true
+addr = "127.0.0.1:5672"
+username = "admin"
+password = "zces@1234"
+vhost = "rnv-harbor-default-vhost"
+queue-name = "rnv-default-queue"
+[fix-workshop-project]
+root-url = "http://192.168.0.116:81"
+root-path = "/rnv/nginx/v1.23.1/html/fix-workshop"
+cycle-fix-plan-path = "storage/app/cycleFix"
+equipment-wiki-document-url-prefix = "storage/equipmentWikiDocument"
+[kafka-server]
+enable = false
+addr = ":9092"
+topic = "revolution"
+[kafka-client]
+enable = false
+addr = ":9092"
+topic = "revolution"

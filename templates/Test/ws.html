@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+<div>
+    <label for="txtUserUuid">绑定UserUuid</label><input type="text" name="" id="txtUserUuid">&emsp;
+    <a href="javascript:" onclick="fnBindUserUuid(txtUserUuid.value)">绑定</a>
+</div>
+<div>
+    <label for="txtEcho">Echo 测试</label><input type="text" name="" id="txtEcho">&emsp;
+    <a href="javascript:" onclick="fnEcho(txtEcho.value)">发送</a>
+</div>
+</body>
+<script>
+    let socket = new WebSocket("ws://127.0.0.1:8049/ws");
+
+    let setSendBody = (businessType, content) => {
+        return JSON.stringify({
+            business_type: businessType,
+            content,
+        });
+    };
+
+    socket.addEventListener("open", e => {
+        console.log(`[websocket-debug] [连接成功]`);
+    });
+
+    socket.addEventListener("message", e => {
+        let resData = JSON.parse(e.data);
+
+        switch (resData['business_type']) {
+            case 'connection-success':
+                let sendContent = setSendBody("authorization/bindUserUuid", {
+                    uuid: "xxx",
+                });
+                socket.send(sendContent);
+                break;
+            case 'message':
+            case 'authorization/bindUserUuid':
+                console.log("[client] received message from server: ", resData);
+                break;
+            default:
+                break;
+        }
+    });
+
+    let fnEcho = content => {
+        if (content) {
+            socket.send(setSendBody("echo", {content: {echoMsg: content}}));
+        }
+    }
+
+    let fnBindUserUuid = userUuid => {
+        if (userUuid) {
+            socket.send(setSendBody("authorization/bindUserUuid", {content: {uuid: userUuid}}));
+        }
+    };
+
+    setInterval(
+        () => {
+            socket.send(setSendBody("ping", {content: {time: new Date().getTime()}}));
+        },
+        30000);
+</script>
+
+</html>

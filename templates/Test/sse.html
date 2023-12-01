@@ -1,0 +1,36 @@
+<html>
+<body>
+<a href="javascript:">发消息</a>
+</body>
+<script>
+    let url = 'http://127.0.0.1:8091/sse?open_id=abc&trace_id=123';
+    let e = new EventSource(url);
+
+    setInterval(() => {
+        e.close();
+        e = new EventSource(url);
+    }, 5000)
+
+    // 正常的EventSource，我们只关心以下三个事件
+    /*
+     * open：订阅成功（和后端连接成功）
+     */
+    e.addEventListener("open", function (e) {
+        console.log('链接成功')
+    })
+    /*
+     * message：后端返回信息，格式可以和后端协商
+     */
+    e.addEventListener("message", function (e) {
+        console.log('收到服务器发来的消息：', e.data)
+    })
+    /*
+     * error：错误（可能是断开，可能是后端返回的信息）
+     */
+    e.addEventListener("error", function (err) {
+        console.log('由于错误，链接被关闭：', err)
+        // 类似的返回信息验证，这里是实例
+        err && err.status === 401 && console.log('not authorized')
+    })
+</script>
+</html>
