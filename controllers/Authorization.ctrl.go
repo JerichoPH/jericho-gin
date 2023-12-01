@@ -135,7 +135,7 @@ func (AuthorizationController) Login(ctx *gin.Context) {
 			"token": token,
 			"account": map[string]any{
 				"id":       account.Id,
-				"account":  account.Username,
+				"username": account.Username,
 				"nickname": account.Nickname,
 				"uuid":     account.Uuid,
 			},
