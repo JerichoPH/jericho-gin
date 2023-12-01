@@ -24,21 +24,21 @@ func (AccountRouter) Load(engine *gin.Engine) {
 	)
 	{
 		// 新建
-		r.POST("account", func(ctx *gin.Context) { controllers.NewAccountController().Store(ctx) })
+		r.POST("account", controllers.NewAccountController().Store)
 
 		// 删除
-		r.DELETE("account/:uuid", func(ctx *gin.Context) { controllers.NewAccountController().Delete(ctx) })
+		r.DELETE("account/:uuid", controllers.NewAccountController().Delete)
 
 		// 编辑
-		r.PUT("account.update/:uuid/update", func(ctx *gin.Context) { controllers.NewAccountController().Update(ctx) })
+		r.PUT("account.update/:uuid/update", controllers.NewAccountController().Update)
 
 		// 详情
-		r.GET("account/:uuid", func(ctx *gin.Context) { controllers.NewAccountController().Detail(ctx) })
+		r.GET("account/:uuid", controllers.NewAccountController().Detail)
 
 		// 列表
-		r.GET("account", func(ctx *gin.Context) { controllers.NewAccountController().List(ctx) })
+		r.GET("account", controllers.NewAccountController().List)
 
 		// jquery-dataTable分页列表
-		r.GET("account.jdt", func(ctx *gin.Context) { controllers.NewAccountController().ListJdt(ctx) })
+		r.GET("account.jdt", controllers.NewAccountController().ListJdt)
 	}
 }
