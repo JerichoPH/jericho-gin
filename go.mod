@@ -14,7 +14,7 @@ require (
 	github.com/redis/go-redis/v9 v9.0.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/xuri/excelize/v2 v2.6.0
-	go.mongodb.org/mongo-driver v1.13.0
+	go.mongodb.org/mongo-driver v1.11.4
 	golang.org/x/crypto v0.15.0
 	gopkg.in/ini.v1 v1.66.6
 	gorm.io/driver/mysql v1.3.2
