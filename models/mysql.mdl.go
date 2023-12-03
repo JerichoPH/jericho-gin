@@ -15,14 +15,15 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// GormModel 基础模型
-type GormModel struct {
+// MysqlModel 基础模型
+type MysqlModel struct {
 	Id                       uint64         `gorm:"primaryKey;autoIncrement;type:bigint unsigned auto_increment;" json:"id"`
-	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"created_at,omitempty"`
-	UpdatedAt                time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;comment:更新时间;" json:"updated_at,omitempty"`
-	DeletedAt                gorm.DeletedAt `gorm:"index;type:datetime" json:"deleted_at"`
+	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"updatedAt,omitempty"`
+	UpdatedAt                time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;comment:更新时间;" json:"updatedAt,omitempty"`
+	DeletedAt                gorm.DeletedAt `gorm:"index;type:datetime" json:"deletedAt"`
 	Uuid                     string         `gorm:"unique;type:varchar(36);not null;comment:uuid;" json:"uuid"`
 	Sort                     int64          `gorm:"type:bigint;default:0;comment:排序;" json:"sort"`
+	BeEnable                 bool           `gorm:"type:boolean;not null;default:0;comment:是否禁用;" json:"beEnable"`
 	ctx                      *gin.Context
 	preloads                 []string
 	selects                  []string
@@ -64,16 +65,16 @@ func RightJoinString(slaveTableName, slaveShortTableName, slaveFieldName, master
 	return "right " + JoinString(slaveTableName, slaveShortTableName, slaveFieldName, masterFieldName)
 }
 
-// NewGorm 构造函数
-func NewGorm() *GormModel {
-	return &GormModel{}
+// NewMySqlModel 构造函数
+func NewMySqlModel() *MysqlModel {
+	return &MysqlModel{}
 }
 
 // demoFindOne 获取单条数据演示
-func (receiver *GormModel) demoFindOne() {
-	var b GormModel
+func (receiver *MysqlModel) demoFindOne() {
+	var b MysqlModel
 	ret := receiver.
-		SetModel(GormModel{}).
+		SetModel(MysqlModel{}).
 		SetWheres(map[string]any{}).
 		SetNotWheres(map[string]any{}).
 		GetDb("").
@@ -82,11 +83,11 @@ func (receiver *GormModel) demoFindOne() {
 }
 
 // demoFind 获取多条数据演示
-func (receiver *GormModel) demoFind() {
-	var b GormModel
+func (receiver *MysqlModel) demoFind() {
+	var b MysqlModel
 	var ctx *gin.Context
 	receiver.
-		SetModel(GormModel{}).
+		SetModel(MysqlModel{}).
 		SetWheresEqual("uuid").
 		SetWheresHasKey(map[string]func(string, *gorm.DB) *gorm.DB{
 			"name": func(fieldName string, db *gorm.DB) *gorm.DB {
@@ -103,178 +104,178 @@ func (receiver *GormModel) demoFind() {
 }
 
 // ScopeBeEnableTrue 启用（查询域）
-func (*GormModel) ScopeBeEnableTrue(db *gorm.DB) *gorm.DB {
+func (*MysqlModel) ScopeBeEnableTrue(db *gorm.DB) *gorm.DB {
 	return db.Where("be_enable is true")
 }
 
 // ScopeBeEnableFalse 不启用（查询域）
-func (*GormModel) ScopeBeEnableFalse(db *gorm.DB) *gorm.DB {
+func (*MysqlModel) ScopeBeEnableFalse(db *gorm.DB) *gorm.DB {
 	return db.Where("be_enable is false")
 }
 
 // SetCtx 设置Context
-func (receiver *GormModel) SetCtx(ctx *gin.Context) *GormModel {
+func (receiver *MysqlModel) SetCtx(ctx *gin.Context) *MysqlModel {
 	receiver.ctx = ctx
 	return receiver
 }
 
 // SetModel 设置使用的模型
-func (receiver *GormModel) SetModel(model interface{}) *GormModel {
+func (receiver *MysqlModel) SetModel(model interface{}) *MysqlModel {
 	receiver.model = model
 	return receiver
 }
 
 // SetDistinct 设置不重复字段
-func (receiver *GormModel) SetDistinct(distinctFieldNames ...string) *GormModel {
+func (receiver *MysqlModel) SetDistinct(distinctFieldNames ...string) *MysqlModel {
 	receiver.distinctFieldNames = distinctFieldNames
 
 	return receiver
 }
 
 // SetPreloads 设置Preloads
-func (receiver *GormModel) SetPreloads(preloads ...string) *GormModel {
+func (receiver *MysqlModel) SetPreloads(preloads ...string) *MysqlModel {
 	receiver.preloads = preloads
 	return receiver
 }
 
 // SetPreloadsByDefault 设置Preloads为默认
-func (receiver *GormModel) SetPreloadsByDefault() *GormModel {
+func (receiver *MysqlModel) SetPreloadsByDefault() *MysqlModel {
 	receiver.preloads = []string{clause.Associations}
 	return receiver
 }
 
 // SetSelects 设置Selects
-func (receiver *GormModel) SetSelects(selects ...string) *GormModel {
+func (receiver *MysqlModel) SetSelects(selects ...string) *MysqlModel {
 	receiver.selects = selects
 	return receiver
 }
 
 // SetOmits 设置Omits
-func (receiver *GormModel) SetOmits(omits ...string) *GormModel {
+func (receiver *MysqlModel) SetOmits(omits ...string) *MysqlModel {
 	receiver.omits = omits
 	return receiver
 }
 
 // SetWheresEqual 设置WhereFields
-func (receiver *GormModel) SetWheresEqual(whereFields ...string) *GormModel {
+func (receiver *MysqlModel) SetWheresEqual(whereFields ...string) *MysqlModel {
 	receiver.whereFields = whereFields
 	return receiver
 }
 
 // SetNotWhereFields 设置NotWhereFields
-func (receiver *GormModel) SetNotWhereFields(notWhereFields ...string) *GormModel {
+func (receiver *MysqlModel) SetNotWhereFields(notWhereFields ...string) *MysqlModel {
 	receiver.notWhereFields = notWhereFields
 	return receiver
 }
 
 // SetOrWhereFields 设置OrWhere字段
-func (receiver *GormModel) SetOrWhereFields(orWhereFields ...string) *GormModel {
+func (receiver *MysqlModel) SetOrWhereFields(orWhereFields ...string) *MysqlModel {
 	receiver.orWhereFields = orWhereFields
 	return receiver
 }
 
 // SetIgnoreFields 设置IgnoreFields
-func (receiver *GormModel) SetIgnoreFields(ignoreFields ...string) *GormModel {
+func (receiver *MysqlModel) SetIgnoreFields(ignoreFields ...string) *MysqlModel {
 	receiver.ignoreFields = ignoreFields
 	return receiver
 }
 
 // SetWheres 通过Map设置Wheres
-func (receiver *GormModel) SetWheres(wheres map[string]any) *GormModel {
+func (receiver *MysqlModel) SetWheres(wheres map[string]any) *MysqlModel {
 	receiver.wheres = wheres
 	return receiver
 }
 
 // SetNotWheres 设置NotWheres
-func (receiver *GormModel) SetNotWheres(notWheres map[string]any) *GormModel {
+func (receiver *MysqlModel) SetNotWheres(notWheres map[string]any) *MysqlModel {
 	receiver.notWheres = notWheres
 	return receiver
 }
 
 // SetOrWheres 设置Or条件
-func (receiver *GormModel) SetOrWheres(orWheres map[string]any) *GormModel {
+func (receiver *MysqlModel) SetOrWheres(orWheres map[string]any) *MysqlModel {
 	receiver.orWheres = orWheres
 	return receiver
 }
 
 // SetScopes 设置Scopes
-func (receiver *GormModel) SetScopes(scopes ...func(*gorm.DB) *gorm.DB) *GormModel {
+func (receiver *MysqlModel) SetScopes(scopes ...func(*gorm.DB) *gorm.DB) *MysqlModel {
 	receiver.scopes = scopes
 	return receiver
 }
 
 // SetWheresHasKey 设置额外搜索条件字段
-func (receiver *GormModel) SetWheresHasKey(wheresExtra map[string]func(string, *gorm.DB) *gorm.DB) *GormModel {
+func (receiver *MysqlModel) SetWheresHasKey(wheresExtra map[string]func(string, *gorm.DB) *gorm.DB) *MysqlModel {
 	receiver.wheresExtra = wheresExtra
 
 	return receiver
 }
 
 // SetWheresExtraHasValue 当Query参数存在时设置额外搜索条件（单个条件）
-func (receiver *GormModel) SetWheresExtraHasValue(wheresExtraExist map[string]func(string, *gorm.DB) *gorm.DB) *GormModel {
+func (receiver *MysqlModel) SetWheresExtraHasValue(wheresExtraExist map[string]func(string, *gorm.DB) *gorm.DB) *MysqlModel {
 	receiver.wheresExtraExist = wheresExtraExist
 
 	return receiver
 }
 
 // SetWheresExtraHasValues 当Query参数存在时设置额外搜索条件（多个条件）
-func (receiver *GormModel) SetWheresExtraHasValues(wheresExtraExists map[string]func([]string, *gorm.DB) *gorm.DB) *GormModel {
+func (receiver *MysqlModel) SetWheresExtraHasValues(wheresExtraExists map[string]func([]string, *gorm.DB) *gorm.DB) *MysqlModel {
 	receiver.wheresExtraExists = wheresExtraExists
 
 	return receiver
 }
 
 // SetWheresDateBetween 设置需要检查的日期范围字段
-func (receiver *GormModel) SetWheresDateBetween(fieldNames ...string) *GormModel {
+func (receiver *MysqlModel) SetWheresDateBetween(fieldNames ...string) *MysqlModel {
 	receiver.whereDateBetween = fieldNames
 
 	return receiver
 }
 
 // SetWheresBetween 设置需要范围查询的条件
-func (receiver *GormModel) SetWheresBetween(fieldNames ...string) *GormModel {
+func (receiver *MysqlModel) SetWheresBetween(fieldNames ...string) *MysqlModel {
 	receiver.whereBetween = fieldNames
 
 	return receiver
 }
 
 // SetWheresIntBetween 设置需要范围查询的条件（数字）
-func (receiver *GormModel) SetWheresIntBetween(fieldNames ...string) *GormModel {
+func (receiver *MysqlModel) SetWheresIntBetween(fieldNames ...string) *MysqlModel {
 	receiver.whereIntBetween = fieldNames
 
 	return receiver
 }
 
 // SetWheresFloatBetween 设置需要范围查询的条件（浮点）
-func (receiver *GormModel) SetWheresFloatBetween(fieldNames ...string) *GormModel {
+func (receiver *MysqlModel) SetWheresFloatBetween(fieldNames ...string) *MysqlModel {
 	receiver.whereFloatBetween = fieldNames
 
 	return receiver
 }
 
 // SetWheresDatetimeBetween 设置需要检查的日期时间范围字段
-func (receiver *GormModel) SetWheresDatetimeBetween(fieldNames ...string) *GormModel {
+func (receiver *MysqlModel) SetWheresDatetimeBetween(fieldNames ...string) *MysqlModel {
 	receiver.whereDatetimeBetween = fieldNames
 
 	return receiver
 }
 
 // SetWheresIn 设置自定义查询条件(in)
-func (receiver *GormModel) SetWheresIn(condition map[string]string) *GormModel {
+func (receiver *MysqlModel) SetWheresIn(condition map[string]string) *MysqlModel {
 	receiver.whereIn = condition
 
 	return receiver
 }
 
 // SetWheresFuzzy 设置模糊查询条件
-func (receiver *GormModel) SetWheresFuzzy(condition map[string]string) *GormModel {
+func (receiver *MysqlModel) SetWheresFuzzy(condition map[string]string) *MysqlModel {
 	receiver.whereFuzzyQueryCondition = condition
 
 	return receiver
 }
 
 // BeforeCreate 插入数据前
-func (receiver *GormModel) BeforeCreate(db *gorm.DB) (err error) {
+func (receiver *MysqlModel) BeforeCreate(db *gorm.DB) (err error) {
 	receiver.Uuid = uuid.NewV4().String()
 	receiver.CreatedAt = time.Now()
 	receiver.UpdatedAt = time.Now()
@@ -282,13 +283,13 @@ func (receiver *GormModel) BeforeCreate(db *gorm.DB) (err error) {
 }
 
 // BeforeSave 修改数据前
-func (receiver *GormModel) BeforeSave(db *gorm.DB) (err error) {
+func (receiver *MysqlModel) BeforeSave(db *gorm.DB) (err error) {
 	receiver.UpdatedAt = time.Now()
 	return
 }
 
 // GetDb 初始化
-func (receiver *GormModel) GetDb(dbConnName string) (query *gorm.DB) {
+func (receiver *MysqlModel) GetDb(dbConnName string) (query *gorm.DB) {
 	query = database.NewGormLauncher().GetConn(dbConnName)
 
 	query = query.Where(receiver.wheres).Not(receiver.notWheres)
@@ -328,7 +329,7 @@ func (receiver *GormModel) GetDb(dbConnName string) (query *gorm.DB) {
 }
 
 // GetDbUseQuery 根据Query参数初始化
-func (receiver *GormModel) GetDbUseQuery(dbConnName string) *gorm.DB {
+func (receiver *MysqlModel) GetDbUseQuery(dbConnName string) *gorm.DB {
 	dbSession := receiver.GetDb(dbConnName)
 
 	wheres := make(map[string]any)

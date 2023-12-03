@@ -19,7 +19,7 @@ func NewAccountRouter() AccountRouter {
 func (AccountRouter) Load(engine *gin.Engine) {
 	r := engine.Group(
 		"api",
-		middlewares.CheckAutho(),
+		middlewares.CheckAuth(),
 		// middlewares.CheckPermission(),
 	)
 	{

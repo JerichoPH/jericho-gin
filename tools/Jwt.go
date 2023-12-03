@@ -104,7 +104,7 @@ func GetJwtFromHeader(ctx *gin.Context) string {
 	tokens := ctx.Request.Header["Authorization"]
 
 	if len(tokens) == 0 {
-		wrongs.ThrowUnAuth("令牌不存在")
+		wrongs.ThrowUnLogin("令牌不存在")
 	}
 	return tokens[0]
 }

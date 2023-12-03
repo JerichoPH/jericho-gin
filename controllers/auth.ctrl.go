@@ -18,7 +18,7 @@ type (
 	authRegisterForm struct {
 		Username             string `json:"username" binding:"required"`
 		Password             string `json:"password" binding:"required"`
-		PasswordConfirmation string `json:"password_confirmation" binding:"required"`
+		PasswordConfirmation string `json:"passwordConfirmation" binding:"required"`
 		Nickname             string `json:"nickname" binding:"required"`
 	}
 	// authLoginForm 登录表单
@@ -90,10 +90,10 @@ func (AuthController) PostRegister(ctx *gin.Context) {
 
 	// 保存新用户
 	account := &models.AccountModel{
-		GormModel: models.GormModel{Uuid: uuid.NewV4().String()},
-		Username:  form.Username,
-		Password:  string(bytes),
-		Nickname:  form.Nickname,
+		MysqlModel: models.MysqlModel{Uuid: uuid.NewV4().String()},
+		Username:   form.Username,
+		Password:   string(bytes),
+		Nickname:   form.Nickname,
 	}
 	if ret = models.NewAccountModel().GetDb("").Create(&account); ret.Error != nil {
 		wrongs.ThrowForbidden("创建失败：" + ret.Error.Error())

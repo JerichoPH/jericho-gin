@@ -12,7 +12,8 @@ func NewAccountService(baseService BaseService) *AccountService {
 
 // GetListByQuery 通过Query获取列表
 func (receiver *AccountService) GetListByQuery() *gorm.DB {
-	return (receiver.Model).
+	return receiver.
+		Model.
 		SetWheresEqual("open_id", "work_area_unique_code", "rank").
 		SetWheresFuzzy(map[string]string{ // 模糊查询字段
 			"account":  "a.account like ?",

@@ -14,13 +14,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// CheckAutho 检查Jwt是否合法
-func CheckAutho() gin.HandlerFunc {
+// CheckAuth 检查Jwt是否合法
+func CheckAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 获取令牌
 		split := strings.Split(tools.GetJwtFromHeader(ctx), " ")
 		if len(split) != 2 {
-			wrongs.ThrowUnAuth("令牌格式错误")
+			wrongs.ThrowUnLogin("令牌格式错误")
 		}
 		tokenType := split[0]
 		token := split[1]
@@ -31,7 +31,7 @@ func CheckAutho() gin.HandlerFunc {
 		)
 		account = models.AccountModel{}
 		if token == "" {
-			wrongs.ThrowUnAuth("令牌不存在")
+			wrongs.ThrowUnLogin("令牌不存在")
 		} else {
 			switch tokenType {
 			case "JWT":
@@ -39,21 +39,21 @@ func CheckAutho() gin.HandlerFunc {
 
 				// 判断令牌是否有效
 				if err != nil {
-					wrongs.ThrowUnAuth("令牌解析失败")
+					wrongs.ThrowUnLogin("令牌解析失败")
 				} else if time.Now().Unix() > claims.ExpiresAt {
-					wrongs.ThrowUnAuth("令牌过期")
+					wrongs.ThrowUnLogin("令牌过期")
 				}
 
 				// 判断用户是否存在
 				if reflect.DeepEqual(claims, tools.Claims{}) {
-					wrongs.ThrowUnAuth("令牌解析失败：用户不存在")
+					wrongs.ThrowUnLogin("令牌解析失败：用户不存在")
 				}
 
 				// 获取用户信息
-				ret = models.NewGorm().SetModel(models.AccountModel{}).GetDb("").Where("uuid", claims.Uuid).First(&account)
+				ret = models.NewMySqlModel().SetModel(models.AccountModel{}).GetDb("").Where("uuid", claims.Uuid).First(&account)
 				wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("令牌指向用户(JWT) %s %v ", token, claims))
 			case "AU":
-				ret = models.NewGorm().SetModel(models.AccountModel{}).SetWheres(map[string]any{"uuid": token}).GetDb("").First(&account)
+				ret = models.NewMySqlModel().SetModel(models.AccountModel{}).SetWheres(map[string]any{"uuid": token}).GetDb("").First(&account)
 				wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("令牌指向用户(AU) %s", token))
 			default:
 				wrongs.ThrowForbidden("权鉴认证方式不支持")

@@ -40,7 +40,7 @@ func (AccountController) Store(ctx *gin.Context) {
 
 	// 新建
 	account := &models.AccountModel{}
-	if ret = models.NewGorm().SetModel(models.AccountModel{}).
+	if ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
 		GetDb("").
 		Create(&account); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
@@ -57,14 +57,14 @@ func (AccountController) Delete(ctx *gin.Context) {
 	)
 
 	// 查询
-	ret = models.NewGorm().SetModel(models.AccountModel{}).
+	ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
 		SetWheres(map[string]any{"uuid": ctx.Param("uuid")}).
 		GetDb("").
 		First(&account)
 	wrongs.ThrowWhenIsEmpty(ret, "用户")
 
 	// 删除
-	if ret := models.NewGorm().SetModel(models.AccountModel{}).GetDb("").Delete(&account); ret.Error != nil {
+	if ret := models.NewMySqlModel().SetModel(models.AccountModel{}).GetDb("").Delete(&account); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
 
@@ -83,14 +83,14 @@ func (AccountController) Update(ctx *gin.Context) {
 	// form := new(accountStoreForm).ShouldBind(ctx)
 
 	// 查询
-	ret = models.NewGorm().SetModel(models.AccountModel{}).
+	ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
 		SetWheres(map[string]any{"uuid": ctx.Param("uuid")}).
 		GetDb("").
 		First(&account)
 	wrongs.ThrowWhenIsEmpty(ret, "用户")
 
 	// 编辑
-	if ret = models.NewGorm().SetModel(models.AccountModel{}).
+	if ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		Save(&account); ret.Error != nil {
@@ -106,7 +106,7 @@ func (AccountController) Detail(ctx *gin.Context) {
 		ret     *gorm.DB
 		account models.AccountModel
 	)
-	ret = models.NewGorm().SetModel(models.AccountModel{}).
+	ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
 		SetWheres(map[string]any{"uuid": ctx.Param("uuid")}).
 		GetDb("").
 		First(&account)
@@ -116,7 +116,7 @@ func (AccountController) Detail(ctx *gin.Context) {
 }
 
 func (AccountController) listByQuery(ctx *gin.Context) *gorm.DB {
-	return services.NewAccountService(services.BaseService{Model: models.NewGorm().SetModel(models.AccountModel{}), Ctx: ctx}).GetListByQuery()
+	return services.NewAccountService(services.BaseService{Model: models.NewMySqlModel().SetModel(models.AccountModel{}), Ctx: ctx}).GetListByQuery()
 }
 
 // List 列表
