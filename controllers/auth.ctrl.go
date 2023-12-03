@@ -12,29 +12,29 @@ import (
 )
 
 type (
-	// AuthoController 权鉴控制器
-	AuthoController struct{}
-	// authoRegisterForm 注册表单
-	authoRegisterForm struct {
+	// AuthController 权鉴控制器
+	AuthController struct{}
+	// authRegisterForm 注册表单
+	authRegisterForm struct {
 		Username             string `json:"username" binding:"required"`
 		Password             string `json:"password" binding:"required"`
 		PasswordConfirmation string `json:"password_confirmation" binding:"required"`
 		Nickname             string `json:"nickname" binding:"required"`
 	}
-	// authoLoginForm 登录表单
-	authoLoginForm struct {
+	// authLoginForm 登录表单
+	authLoginForm struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 )
 
 // NewAuthController 构造函数
-func NewAuthController() *AuthoController {
-	return &AuthoController{}
+func NewAuthController() *AuthController {
+	return &AuthController{}
 }
 
 // ShouldBind 绑定表单（注册）
-func (receiver authoRegisterForm) ShouldBind(ctx *gin.Context) authoRegisterForm {
+func (receiver authRegisterForm) ShouldBind(ctx *gin.Context) authRegisterForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -55,7 +55,7 @@ func (receiver authoRegisterForm) ShouldBind(ctx *gin.Context) authoRegisterForm
 }
 
 // ShouldBind 绑定表单（登陆）
-func (receiver authoLoginForm) ShouldBind(ctx *gin.Context) authoLoginForm {
+func (receiver authLoginForm) ShouldBind(ctx *gin.Context) authLoginForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -73,9 +73,9 @@ func (receiver authoLoginForm) ShouldBind(ctx *gin.Context) authoLoginForm {
 }
 
 // PostRegister 注册
-func (AuthoController) PostRegister(ctx *gin.Context) {
+func (AuthController) PostRegister(ctx *gin.Context) {
 	// 表单验证
-	form := authoRegisterForm{}.ShouldBind(ctx)
+	form := authRegisterForm{}.ShouldBind(ctx)
 
 	// 检查重复项（用户名）
 	var repeat models.AccountModel
@@ -103,9 +103,9 @@ func (AuthoController) PostRegister(ctx *gin.Context) {
 }
 
 // PostLogin 登录
-func (AuthoController) PostLogin(ctx *gin.Context) {
+func (AuthController) PostLogin(ctx *gin.Context) {
 	// 表单验证
-	form := authoLoginForm{}.ShouldBind(ctx)
+	form := authLoginForm{}.ShouldBind(ctx)
 
 	var (
 		account models.AccountModel
