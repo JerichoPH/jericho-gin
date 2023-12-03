@@ -1,8 +1,8 @@
 package apiRoute
 
 import (
-	"jericho-go/controllers"
-	"jericho-go/middlewares"
+	"jericho-gin/controllers"
+	"jericho-gin/middlewares"
 
 	"github.com/gin-gonic/gin"
 )

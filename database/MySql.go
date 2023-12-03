@@ -5,7 +5,7 @@ import (
 	"time"
 	_ "time/tzdata"
 
-	"jericho-go/settings"
+	"jericho-gin/settings"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

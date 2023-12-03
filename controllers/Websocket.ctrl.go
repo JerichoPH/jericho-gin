@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"jericho-gin/providers"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
+
 	"github.com/gin-gonic/gin"
-	"jericho-go/providers"
-	"jericho-go/tools"
-	"jericho-go/wrongs"
 )
 
 type (

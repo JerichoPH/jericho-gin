@@ -2,8 +2,8 @@ package tools
 
 import (
 	"fmt"
-	"jericho-go/types"
-	"jericho-go/wrongs"
+	"jericho-gin/types"
+	"jericho-gin/wrongs"
 	"time"
 )
 

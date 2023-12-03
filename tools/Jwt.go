@@ -1,7 +1,7 @@
 package tools
 
 import (
-	"jericho-go/wrongs"
+	"jericho-gin/wrongs"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -72,7 +72,7 @@ func generateJwtWithExpire(
 			// 过期时间
 			ExpiresAt: expireTime.Unix(),
 			// 指定token发行人
-			Issuer: "jericho-go",
+			Issuer: "jericho-gin",
 		},
 	}
 

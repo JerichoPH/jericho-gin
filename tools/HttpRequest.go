@@ -2,12 +2,13 @@ package tools
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
-	"jericho-go/wrongs"
+	"jericho-gin/wrongs"
 	"net/http"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
 )
 
 type HttpRequestDataType string

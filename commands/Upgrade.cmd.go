@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"jericho-go/database"
+	"jericho-gin/database"
 )
 
 // UpgradeCommand 程序升级

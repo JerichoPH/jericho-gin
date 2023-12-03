@@ -3,12 +3,13 @@ package database
 import (
 	"context"
 	"fmt"
+	"jericho-gin/settings"
+	"jericho-gin/wrongs"
+	"net/url"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"jericho-go/settings"
-	"jericho-go/wrongs"
-	"net/url"
 )
 
 type Mongo struct {

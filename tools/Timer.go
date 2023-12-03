@@ -2,7 +2,7 @@ package tools
 
 import (
 	"fmt"
-	"jericho-go/types"
+	"jericho-gin/types"
 	"os"
 	"time"
 )

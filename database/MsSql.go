@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
+	"jericho-gin/settings"
+	"time"
+
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
-	"jericho-go/settings"
-	"time"
 )
 
 type MsSql struct {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"jericho-go/database"
-	"jericho-go/tools"
-	"jericho-go/wrongs"
+	"jericho-gin/database"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
 
 	uuid "github.com/satori/go.uuid"
 )

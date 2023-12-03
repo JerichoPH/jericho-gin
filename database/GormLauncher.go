@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"jericho-go/settings"
-	"jericho-go/wrongs"
+	"jericho-gin/settings"
+	"jericho-gin/wrongs"
 	"os"
 
 	"gorm.io/gorm"

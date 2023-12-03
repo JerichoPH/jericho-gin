@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"jericho-go/models"
-	"jericho-go/services"
-	"jericho-go/tools"
-	"jericho-go/wrongs"
+	"jericho-gin/models"
+	"jericho-gin/services"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

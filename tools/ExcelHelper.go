@@ -2,7 +2,7 @@ package tools
 
 import (
 	"fmt"
-	"jericho-go/wrongs"
+	"jericho-gin/wrongs"
 	"net/url"
 
 	"github.com/gin-gonic/gin"

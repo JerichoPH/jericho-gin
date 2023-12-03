@@ -1,12 +1,13 @@
 package settings
 
 import (
-	"gopkg.in/ini.v1"
-	"jericho-go/tools"
-	"jericho-go/wrongs"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"gopkg.in/ini.v1"
 )
 
 // Setting 设置

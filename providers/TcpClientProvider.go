@@ -2,8 +2,8 @@ package providers
 
 import (
 	"encoding/json"
-	"jericho-go/tools"
-	"jericho-go/types"
+	"jericho-gin/tools"
+	"jericho-gin/types"
 	"log"
 	"net"
 	"time"

@@ -1,14 +1,14 @@
 package tools
 
 import (
-	"jericho-go/wrongs"
+	"jericho-gin/wrongs"
 	"math"
 	"strconv"
 	"sync"
 
 	uuid "github.com/satori/go.uuid"
 
-	"jericho-go/types"
+	"jericho-gin/types"
 
 	"github.com/gin-gonic/gin"
 

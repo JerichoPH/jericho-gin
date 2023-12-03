@@ -2,10 +2,10 @@ package middlewares
 
 import (
 	"fmt"
-	"jericho-go/models"
-	"jericho-go/tools"
-	"jericho-go/types"
-	"jericho-go/wrongs"
+	"jericho-gin/models"
+	"jericho-gin/tools"
+	"jericho-gin/types"
+	"jericho-gin/wrongs"
 	"reflect"
 	"strings"
 	"time"

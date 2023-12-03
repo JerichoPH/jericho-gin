@@ -12,7 +12,7 @@ func RecoverHandler(c *gin.Context) {
 	defer func() {
 		if reco := recover(); reco != nil {
 			// 打印错误堆栈信息
-			log.Printf("捕获异常: %v\n", reco)
+			log.Printf("panic: %v\n", reco)
 
 			// 判断错误类型
 			switch fmt.Sprintf("%T", reco) {

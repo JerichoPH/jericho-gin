@@ -2,9 +2,9 @@ package providers
 
 import (
 	"encoding/json"
-	"jericho-go/tools"
-	"jericho-go/types"
-	"jericho-go/wrongs"
+	"jericho-gin/tools"
+	"jericho-gin/types"
+	"jericho-gin/wrongs"
 	"log"
 	"net/http"
 	"sync"

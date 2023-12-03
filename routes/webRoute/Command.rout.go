@@ -1,7 +1,7 @@
 package webRoute
 
 import (
-	"jericho-go/controllers"
+	"jericho-gin/controllers"
 
 	"github.com/gin-gonic/gin"
 )

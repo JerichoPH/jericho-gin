@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"fmt"
-	"jericho-go/providers"
-	"jericho-go/settings"
-	"jericho-go/tools"
-	"jericho-go/wrongs"
+	"jericho-gin/providers"
+	"jericho-gin/settings"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/ini.v1"

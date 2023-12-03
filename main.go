@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"jericho-go/models"
+	"jericho-gin/models"
 	"log"
 	"os"
 	"os/exec"
@@ -11,16 +11,16 @@ import (
 	"syscall"
 	"time"
 
-	"jericho-go/commands"
-	"jericho-go/database"
-	"jericho-go/middlewares"
-	"jericho-go/providers"
-	"jericho-go/routes/apiRoute"
-	"jericho-go/routes/webRoute"
-	"jericho-go/settings"
-	"jericho-go/tools"
-	"jericho-go/types"
-	"jericho-go/wrongs"
+	"jericho-gin/commands"
+	"jericho-gin/database"
+	"jericho-gin/middlewares"
+	"jericho-gin/providers"
+	"jericho-gin/routes/apiRoute"
+	"jericho-gin/routes/webRoute"
+	"jericho-gin/settings"
+	"jericho-gin/tools"
+	"jericho-gin/types"
+	"jericho-gin/wrongs"
 
 	"github.com/gin-gonic/gin"
 )
@@ -98,7 +98,10 @@ type (
 
 // 自动迁移列表
 var autoMigrateList = []any{
-	models.AccountModel{}, // 用户
+	models.AccountModel{},        // 用户
+	models.RbacRoleModel{},       // 权限管理-角色
+	models.RbacPermissionModel{}, // 权限管理-权限
+	models.RbacMenuModel{},       // 权限管理-菜单
 }
 
 // 执行command命令

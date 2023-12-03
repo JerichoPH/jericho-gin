@@ -2,9 +2,10 @@ package webRoute
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"jericho-go/settings"
+	"jericho-gin/settings"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type HomeRouter struct{}

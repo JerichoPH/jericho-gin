@@ -1,7 +1,7 @@
 package services
 
 import (
-	"jericho-go/models"
+	"jericho-gin/models"
 
 	"github.com/gin-gonic/gin"
 )

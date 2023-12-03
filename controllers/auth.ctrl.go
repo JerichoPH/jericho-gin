@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"jericho-go/models"
-	"jericho-go/tools"
-	"jericho-go/wrongs"
+	"jericho-gin/models"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"

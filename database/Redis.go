@@ -3,8 +3,8 @@ package database
 import (
 	"context"
 	"fmt"
-	"jericho-go/settings"
-	"jericho-go/types"
+	"jericho-gin/settings"
+	"jericho-gin/types"
 	"log"
 	"time"
 

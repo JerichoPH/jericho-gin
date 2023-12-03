@@ -2,8 +2,8 @@ package models
 
 import (
 	"fmt"
-	"jericho-go/database"
-	"jericho-go/wrongs"
+	"jericho-gin/database"
+	"jericho-gin/wrongs"
 	"strconv"
 	"strings"
 	"time"
@@ -21,7 +21,7 @@ type GormModel struct {
 	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"created_at,omitempty"`
 	UpdatedAt                time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;comment:更新时间;" json:"updated_at,omitempty"`
 	DeletedAt                gorm.DeletedAt `gorm:"index;type:datetime" json:"deleted_at"`
-	Uuid                     string         `gorm:"type:varchar(36);comment:uuid;" json:"uuid"`
+	Uuid                     string         `gorm:"unique;type:varchar(36);not null;comment:uuid;" json:"uuid"`
 	Sort                     int64          `gorm:"type:bigint;default:0;comment:排序;" json:"sort"`
 	ctx                      *gin.Context
 	preloads                 []string

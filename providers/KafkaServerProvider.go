@@ -2,7 +2,7 @@ package providers
 
 import (
 	"fmt"
-	"jericho-go/wrongs"
+	"jericho-gin/wrongs"
 
 	"github.com/IBM/sarama"
 )

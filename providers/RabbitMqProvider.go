@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"jericho-go/types"
+	"jericho-gin/types"
 	"log"
 	"time"
 

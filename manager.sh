@@ -27,7 +27,7 @@ case $1 in
     if [ "$2" = false ]; then
         daemonParam=false
     fi
-    chmod 755 ./jericho-go && ./jericho-go -daemon=$daemonParam
+    chmod 755 ./jericho-gin && ./jericho-gin -daemon=$daemonParam
     ;;
 "stop")
     # 关闭程序 如果第二个参数=true则视为强制关闭
@@ -37,11 +37,11 @@ case $1 in
         killParamCode=9
         killParamText="关闭成功（强制关闭）"
     fi
-    ps aux | grep jericho-go | grep -v grep | awk '{print $2}' | xargs kill -$killParamCode && echo $killParamText
+    ps aux | grep jericho-gin | grep -v grep | awk '{print $2}' | xargs kill -$killParamCode && echo $killParamText
     ;;
 "status")
     # 查看程序运行状态
-    ps aux | grep jericho-go | grep -v grep | xargs
+    ps aux | grep jericho-gin | grep -v grep | xargs
     ;;
 "restart")
     # 重新启动 第二个参数相当于start和stop的第二个参数
@@ -66,8 +66,8 @@ case $1 in
         echo "初始化打包输出目录" &&
         rm -rf "./out/$2" &&
         mkdir -p "./out/$2" &&
-        echo "编译『程序：jericho-go』『版本：$2』『平台：$goosName』『架构：$goarchCode』" &&
-        CGO_ENABLED=0 GOOS=$3 GOARCH=$goarchCode go build -a -race -v -o "./out/$2/" "jericho-go" &&
+        echo "编译『程序：jericho-gin』『版本：$2』『平台：$goosName』『架构：$goarchCode』" &&
+        CGO_ENABLED=0 GOOS=$3 GOARCH=$goarchCode go build -a -race -v -o "./out/$2/" "jericho-gin" &&
         echo "编译成功" && 
         echo "打包：模板文件" &&
         cp -r ./templates "./out/$2/" &&
@@ -99,7 +99,7 @@ case $1 in
     ;;
 "script")
     # 第二个参数代表需要执行的t参数
-    ./jericho-go -t=$2
+    ./jericho-gin -t=$2
     ;;
 *)
     echo "没有这个命令，请执行help命令查看帮助"

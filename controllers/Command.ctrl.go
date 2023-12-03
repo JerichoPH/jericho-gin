@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"jericho-go/tools"
-	"jericho-go/wrongs"
+	"jericho-gin/tools"
+	"jericho-gin/wrongs"
 
 	"github.com/gin-gonic/gin"
 )

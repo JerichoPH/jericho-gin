@@ -3,8 +3,8 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
-	"jericho-go/types"
-	"jericho-go/wrongs"
+	"jericho-gin/types"
+	"jericho-gin/wrongs"
 	"log"
 	"sync"
 

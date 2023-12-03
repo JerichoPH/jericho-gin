@@ -1,4 +1,4 @@
-module jericho-go
+module jericho-gin
 
 go 1.20
 

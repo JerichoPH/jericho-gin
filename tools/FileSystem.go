@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"io/ioutil"
-	"jericho-go/wrongs"
+	"jericho-gin/wrongs"
 	"os"
 )
 
