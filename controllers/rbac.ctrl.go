@@ -21,7 +21,7 @@ type (
 	}
 )
 
-// 角色表单绑定
+// ShouldBind 角色表单绑定
 func (receiver RbacRoleStoreForm) ShouldBind(ctx *gin.Context) RbacRoleStoreForm {
 	var err error
 

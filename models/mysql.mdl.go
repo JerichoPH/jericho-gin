@@ -18,7 +18,7 @@ import (
 // MysqlModel 基础模型
 type MysqlModel struct {
 	Id                       uint64         `gorm:"primaryKey;autoIncrement;type:bigint unsigned auto_increment;" json:"id"`
-	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"updatedAt,omitempty"`
+	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"createdAt,omitempty"`
 	UpdatedAt                time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;comment:更新时间;" json:"updatedAt,omitempty"`
 	DeletedAt                gorm.DeletedAt `gorm:"index;type:datetime" json:"deletedAt"`
 	Uuid                     string         `gorm:"unique;type:varchar(36);not null;comment:uuid;" json:"uuid"`

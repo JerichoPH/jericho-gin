@@ -87,7 +87,7 @@ func (receiver Redis) ZRange(key, min, max string, offset, count int64) ([]redis
 	return values, err
 }
 
-// ZInterStore
+// ZInterStore ...
 func (receiver Redis) ZInterStore(keys []string, weights types.ListFloat64) (int64, error) {
 	values, err := receiver.Client.ZInterStore(context.Background(), "out", &redis.ZStore{
 		Keys:    keys,

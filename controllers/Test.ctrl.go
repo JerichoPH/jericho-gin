@@ -66,7 +66,7 @@ func (receiver TestController) AnySendToTcpClient(ctx *gin.Context) {
 	ctx.JSON(tools.NewCorrectWithGinContext("OK", ctx).Datum(map[string]any{"content": fmt.Sprintf("%s %v", form.MessageTitle, form.MessageContent)}).ToGinResponse())
 }
 
-// AndSendToKafkaClient 发送消息到kafka
+// AnySendToKafkaClient 发送消息到kafka
 func (receiver TestController) AnySendToKafkaClient(ctx *gin.Context) {
 	var (
 		appSetting *ini.File

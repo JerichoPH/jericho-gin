@@ -61,7 +61,7 @@ func (receiver *GormLauncher) GetConn(dbConnName string) (dbSession *gorm.DB) {
 	return
 }
 
-// bootAutoMigrate 初始化数据库迁移
+// BootAutoMigrate 初始化数据库迁移
 func (receiver *GormLauncher) BootAutoMigrate(dst []any) {
 	if errAutoMigrate := receiver.GetConn("").AutoMigrate(dst...); errAutoMigrate != nil {
 		fmt.Println("数据库迁移错误:", errAutoMigrate.Error())

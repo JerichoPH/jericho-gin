@@ -40,7 +40,7 @@ func CloseKafkaServer() {
 	}
 }
 
-// 发送kafka消息
+// KafkaSendMessage 发送kafka消息
 func KafkaSendMessage(topic, key, content string) error {
 	// 定义一个生产消息，包括Topic、消息内容
 	msg := &sarama.ProducerMessage{
