@@ -14,8 +14,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// CheckAuthorization 检查Jwt是否合法
-func CheckAuthorization() gin.HandlerFunc {
+// CheckAutho 检查Jwt是否合法
+func CheckAutho() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 获取令牌
 		split := strings.Split(tools.GetJwtFromHeader(ctx), " ")
@@ -62,7 +62,7 @@ func CheckAuthorization() gin.HandlerFunc {
 			ctx.Set(string(types.ACCOUNT_ID), account.Id)             // 设置用户编号
 			ctx.Set(string(types.ACCOUNT_ACCOUNT), account.Username)  // 设置用户账号
 			ctx.Set(string(types.ACCOUNT_NICKNAME), account.Nickname) // 设置用户昵称
-			ctx.Set(string(types.ACCOUNT_AUTHORIZATION), account)     // 设置用户信息
+			ctx.Set(string(types.ACCOUNT_AUTH), account)              // 设置用户信息
 		}
 
 		ctx.Next()

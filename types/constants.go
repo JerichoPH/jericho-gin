@@ -19,12 +19,11 @@ const (
 type AccountField string
 
 const (
-	ACCOUNT_ID                    AccountField = "***ACCOUNT.ID***"
-	ACCOUNT_ACCOUNT               AccountField = "***ACCOUNT.USERNAME***"
-	ACCOUNT_OPEN_ID               AccountField = "***ACCOUNT.UUID***"
-	ACCOUNT_NICKNAME              AccountField = "***ACCOUNT.NICKNAME***"
-	ACCOUNT_WORK_AREA_UNIQUE_CODE AccountField = "***ACCOUNT.WORK_AREA_UNIQUE_CODE***"
-	ACCOUNT_AUTHORIZATION         AccountField = "***ACCOUNT.AUTHORIZATION***"
+	ACCOUNT_ID       AccountField = "***ACCOUNT.ID***"
+	ACCOUNT_ACCOUNT  AccountField = "***ACCOUNT.USERNAME***"
+	ACCOUNT_UUID     AccountField = "***ACCOUNT.UUID***"
+	ACCOUNT_NICKNAME AccountField = "***ACCOUNT.NICKNAME***"
+	ACCOUNT_AUTH     AccountField = "***ACCOUNT.AUTH***"
 )
 
 type Marker string

@@ -12,29 +12,29 @@ import (
 )
 
 type (
-	// AuthorizationController 权鉴控制器
-	AuthorizationController struct{}
-	// authorizationRegisterForm 注册表单
-	authorizationRegisterForm struct {
+	// AuthoController 权鉴控制器
+	AuthoController struct{}
+	// authoRegisterForm 注册表单
+	authoRegisterForm struct {
 		Username             string `json:"username" binding:"required"`
 		Password             string `json:"password" binding:"required"`
 		PasswordConfirmation string `json:"password_confirmation" binding:"required"`
 		Nickname             string `json:"nickname" binding:"required"`
 	}
-	// authorizationLoginForm 登录表单
-	authorizationLoginForm struct {
+	// authoLoginForm 登录表单
+	authoLoginForm struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 )
 
-// NewAuthorizationController 构造函数
-func NewAuthorizationController() *AuthorizationController {
-	return &AuthorizationController{}
+// NewAuthController 构造函数
+func NewAuthController() *AuthoController {
+	return &AuthoController{}
 }
 
 // ShouldBind 绑定表单（注册）
-func (receiver authorizationRegisterForm) ShouldBind(ctx *gin.Context) authorizationRegisterForm {
+func (receiver authoRegisterForm) ShouldBind(ctx *gin.Context) authoRegisterForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -55,7 +55,7 @@ func (receiver authorizationRegisterForm) ShouldBind(ctx *gin.Context) authoriza
 }
 
 // ShouldBind 绑定表单（登陆）
-func (receiver authorizationLoginForm) ShouldBind(ctx *gin.Context) authorizationLoginForm {
+func (receiver authoLoginForm) ShouldBind(ctx *gin.Context) authoLoginForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -72,10 +72,10 @@ func (receiver authorizationLoginForm) ShouldBind(ctx *gin.Context) authorizatio
 	return receiver
 }
 
-// Register 注册
-func (AuthorizationController) Register(ctx *gin.Context) {
+// PostRegister 注册
+func (AuthoController) PostRegister(ctx *gin.Context) {
 	// 表单验证
-	form := authorizationRegisterForm{}.ShouldBind(ctx)
+	form := authoRegisterForm{}.ShouldBind(ctx)
 
 	// 检查重复项（用户名）
 	var repeat models.AccountModel
@@ -102,10 +102,10 @@ func (AuthorizationController) Register(ctx *gin.Context) {
 	ctx.JSON(tools.NewCorrectWithGinContext("注册成功", ctx).Created(map[string]any{"account": account}).ToGinResponse())
 }
 
-// Login 登录
-func (AuthorizationController) Login(ctx *gin.Context) {
+// PostLogin 登录
+func (AuthoController) PostLogin(ctx *gin.Context) {
 	// 表单验证
-	form := authorizationLoginForm{}.ShouldBind(ctx)
+	form := authoLoginForm{}.ShouldBind(ctx)
 
 	var (
 		account models.AccountModel
