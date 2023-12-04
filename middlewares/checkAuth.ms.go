@@ -51,10 +51,14 @@ func CheckAuth() gin.HandlerFunc {
 
 				// 获取用户信息
 				ret = models.NewMySqlModel().SetModel(models.AccountModel{}).GetDb("").Where("uuid", claims.Uuid).First(&account)
-				wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("令牌指向用户(JWT) %s %v ", token, claims))
+				if wrongs.ThrowWhenIsEmpty(ret, "") {
+					wrongs.ThrowUnLogin(fmt.Sprintf("令牌指向用户(JWT) %s %v ", token, claims))
+				}
 			case "AU":
 				ret = models.NewMySqlModel().SetModel(models.AccountModel{}).SetWheres(map[string]any{"uuid": token}).GetDb("").First(&account)
-				wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("令牌指向用户(AU) %s", token))
+				if wrongs.ThrowWhenIsEmpty(ret, "") {
+					wrongs.ThrowUnLogin(fmt.Sprintf("令牌指向用户(AU) %s", token))
+				}
 			default:
 				wrongs.ThrowForbidden("权鉴认证方式不支持")
 			}

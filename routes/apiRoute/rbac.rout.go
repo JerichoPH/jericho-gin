@@ -17,23 +17,47 @@ func NewRbacRouter() RbacRouter {
 
 // Load 加载路由
 func (RbacRouter) Load(engine *gin.Engine) {
-	roleRouter := engine.Group(
-		"api/rbac",
-		middlewares.CheckAuth(),
-	// middlewares.CheckPermission(),
-	)
+	r := engine.Group("/api/rbac")
 	{
-		// 新建
-		roleRouter.POST("role", controllers.NewRbacRoleController().Store)
-		// 删除
-		roleRouter.DELETE("role/:uuid", controllers.NewRbacRoleController().Delete)
-		// 编辑
-		roleRouter.PUT("role/:uuid", controllers.NewRbacRoleController().Update)
-		// 详情
-		roleRouter.GET("role/:uuid", controllers.NewRbacRoleController().Detail)
-		// 列表
-		roleRouter.GET("role", controllers.NewRbacRoleController().List)
-		// jquery-dataTable数据列表
-		roleRouter.GET("role.jdt", controllers.NewRbacRoleController().ListJdt)
+		// 角色
+		rbacRoleRouter := r.Group(
+			"role",
+			middlewares.CheckAuth(),
+		)
+		{
+			// 新建
+			rbacRoleRouter.POST("", controllers.NewRbacRoleController().Store)
+			// 删除
+			rbacRoleRouter.DELETE("/:uuid", controllers.NewRbacRoleController().Delete)
+			// 编辑
+			rbacRoleRouter.PUT("/:uuid", controllers.NewRbacRoleController().Update)
+			// 详情
+			rbacRoleRouter.GET("/:uuid", controllers.NewRbacRoleController().Detail)
+			// 列表
+			rbacRoleRouter.GET("", controllers.NewRbacRoleController().List)
+			// jquery-dataTable数据列表
+			rbacRoleRouter.GET(".jdt", controllers.NewRbacRoleController().ListJdt)
+		}
+
+		// 权限
+		rbacPermissionRouter := r.Group(
+			"permission",
+			middlewares.CheckAuth(),
+		)
+		{
+			// 新建
+			rbacPermissionRouter.POST("", controllers.NewRbacPermissionController().Store)
+			// 删除
+			rbacPermissionRouter.DELETE("/:uuid", controllers.NewRbacPermissionController().Delete)
+			// 编辑
+			rbacPermissionRouter.PUT("/:uuid", controllers.NewRbacPermissionController().Update)
+			// 详情
+			rbacPermissionRouter.GET("/:uuid", controllers.NewRbacPermissionController().Detail)
+			// 列表
+			rbacPermissionRouter.GET("", controllers.NewRbacPermissionController().List)
+			// jquery-dataTable数据列表
+			rbacPermissionRouter.GET(".jdt", controllers.NewRbacPermissionController().ListJdt)
+		}
 	}
+
 }

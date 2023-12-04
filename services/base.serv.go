@@ -8,7 +8,7 @@ import (
 
 type (
 	BaseService struct {
-		Model      *models.MysqlModel
+		Model      *models.MySqlModel
 		Ctx        *gin.Context
 		DbConnName string
 	}

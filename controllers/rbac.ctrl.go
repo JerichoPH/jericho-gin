@@ -17,7 +17,17 @@ type (
 
 	// RbacRoleStoreForm 角色表单
 	RbacRoleStoreForm struct {
-		Name string `json:"name" binding:"required"`
+		Name string `json:"name"`
+	}
+
+	// RbacPermissionController 权限控制器
+	RbacPermissionController struct{}
+
+	// RbacPermissionStoreForm 权限表单
+	RbacPermissionStoreForm struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Uri         string `json:"uri"`
 	}
 )
 
@@ -29,6 +39,22 @@ func (receiver RbacRoleStoreForm) ShouldBind(ctx *gin.Context) RbacRoleStoreForm
 		if len(receiver.Name) == 0 {
 			wrongs.ThrowValidate("角色名称不能为空")
 		}
+	}
+
+	return receiver
+}
+
+// ShouldBind 权限表单绑定
+func (receiver RbacPermissionStoreForm) ShouldBind(ctx *gin.Context) RbacPermissionStoreForm {
+
+	if err := ctx.ShouldBind(&receiver); err != nil {
+		wrongs.ThrowValidate(err.Error())
+	}
+	if receiver.Name == "" {
+		wrongs.ThrowValidate("权限名称必填")
+	}
+	if receiver.Uri == "" {
+		wrongs.ThrowValidate("权限路由必填")
 	}
 
 	return receiver
@@ -58,7 +84,8 @@ func (RbacRoleController) Store(ctx *gin.Context) {
 
 	// 新建
 	rbacRole := &models.RbacRoleModel{
-		MysqlModel: models.MysqlModel{Uuid: uuid.NewV4().String()},
+		MySqlModel: models.MySqlModel{Uuid: uuid.NewV4().String()},
+		Name:       form.Name,
 	}
 	if ret = models.NewRbacRoleModel().
 		GetDb("").
@@ -146,10 +173,6 @@ func (RbacRoleController) Detail(ctx *gin.Context) {
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbacRole": rbacRole}).ToGinResponse())
 }
 
-func (RbacRoleController) listUseQuery(ctx *gin.Context) *gorm.DB {
-	return services.NewRbacRoleService(services.BaseService{Model: models.NewMySqlModel().SetModel(models.RbacRoleModel{}), Ctx: ctx}).GetListByQuery()
-}
-
 // List 列表
 func (receiver RbacRoleController) List(ctx *gin.Context) {
 	var rbacRoles []*models.RbacRoleModel
@@ -157,7 +180,7 @@ func (receiver RbacRoleController) List(ctx *gin.Context) {
 	ctx.JSON(
 		tools.NewCorrectWithGinContext("", ctx).
 			DataForPager(
-				receiver.listUseQuery(ctx),
+				models.RbacRoleModel{}.GetListByQuery(ctx),
 				func(db *gorm.DB) map[string]interface{} {
 					db.Find(&rbacRoles)
 					return map[string]any{"rbacRoles": rbacRoles}
@@ -174,10 +197,165 @@ func (receiver RbacRoleController) ListJdt(ctx *gin.Context) {
 	ctx.JSON(
 		tools.NewCorrectWithGinContext("", ctx).
 			DataForJqueryDataTable(
-				receiver.listUseQuery(ctx),
+				models.RbacRoleModel{}.GetListByQuery(ctx),
 				func(db *gorm.DB) map[string]interface{} {
 					db.Find(&rbacRoles)
 					return map[string]any{"rbacRoles": rbacRoles}
+				},
+			).
+			ToGinResponse(),
+	)
+}
+
+// NewRbacPermissionController 构造函数
+func NewRbacPermissionController() *RbacPermissionController {
+	return &RbacPermissionController{}
+}
+
+// Store 新建
+func (RbacPermissionController) Store(ctx *gin.Context) {
+	var (
+		ret    *gorm.DB
+		repeat models.RbacPermissionModel
+	)
+
+	// 表单
+	form := RbacPermissionStoreForm{}.ShouldBind(ctx)
+
+	// 查重
+	ret = models.NewRbacPermissionModel().
+		GetDb("").
+		Where("name = ?", form.Name).
+		First(&repeat)
+	wrongs.ThrowWhenIsRepeat(ret, "权限名称")
+
+	// 新建
+	rbacPermission := &models.RbacPermissionModel{
+		MySqlModel:  models.MySqlModel{Uuid: uuid.NewV4().String()},
+		Name:        form.Name,
+		Uri:         form.Uri,
+		Description: &form.Description,
+	}
+	if ret = models.NewRbacPermissionModel().
+		GetDb("").
+		Create(&rbacPermission); ret.Error != nil {
+		wrongs.ThrowForbidden(ret.Error.Error())
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Created(map[string]any{"rbacPermission": rbacPermission}).ToGinResponse())
+}
+
+// Delete 删除
+func (RbacPermissionController) Delete(ctx *gin.Context) {
+	var (
+		ret            *gorm.DB
+		rbacPermission models.RbacPermissionModel
+	)
+
+	// 查询
+	ret = models.NewRbacPermissionModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		First(&rbacPermission)
+	wrongs.ThrowWhenIsEmpty(ret, "权限")
+
+	// 删除
+	if ret := models.NewRbacPermissionModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		Delete(&rbacPermission); ret.Error != nil {
+		wrongs.ThrowForbidden(ret.Error.Error())
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Deleted().ToGinResponse())
+}
+
+// Update 编辑
+func (RbacPermissionController) Update(ctx *gin.Context) {
+	var (
+		ret                    *gorm.DB
+		rbacPermission, repeat models.RbacPermissionModel
+	)
+
+	// 表单
+	form := RbacPermissionStoreForm{}.ShouldBind(ctx)
+
+	// 查重
+	ret = models.NewRbacPermissionModel().
+		GetDb("").
+		Where("name = ? and uuid <> ?", form.Name, ctx.Param("uuid")).
+		First(&repeat)
+	wrongs.ThrowWhenIsRepeat(ret, "权限名称")
+
+	// 查询
+	ret = models.NewRbacPermissionModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		First(&rbacPermission)
+	wrongs.ThrowWhenIsEmpty(ret, "权限")
+
+	// 编辑
+	rbacPermission.Name = form.Name
+	rbacPermission.Description = &form.Description
+	rbacPermission.Uri = form.Uri
+	if ret = models.NewRbacPermissionModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		Save(&rbacPermission); ret.Error != nil {
+		wrongs.ThrowForbidden(ret.Error.Error())
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Updated(map[string]any{"rbacPermission": rbacPermission}).ToGinResponse())
+}
+
+// Detail 详情
+func (RbacPermissionController) Detail(ctx *gin.Context) {
+	var (
+		ret            *gorm.DB
+		rbacPermission models.RbacPermissionModel
+	)
+	ret = models.NewRbacPermissionModel().
+		SetCtx(ctx).
+		GetDbUseQuery("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		First(&rbacPermission)
+	wrongs.ThrowWhenIsEmpty(ret, "权限")
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbacPermission": rbacPermission}).ToGinResponse())
+}
+
+func (RbacPermissionController) listUseQuery(ctx *gin.Context) *gorm.DB {
+	return services.NewRbacPermissionService(services.BaseService{Model: models.NewRbacPermissionModel().SetModel(models.RbacPermissionModel{}), Ctx: ctx}).GetListByQuery()
+}
+
+// List 列表
+func (receiver RbacPermissionController) List(ctx *gin.Context) {
+	var rbacPermissions []*models.RbacPermissionModel
+
+	ctx.JSON(
+		tools.NewCorrectWithGinContext("", ctx).
+			DataForPager(
+				models.RbacPermissionModel{}.GetListByQuery(ctx),
+				func(db *gorm.DB) map[string]interface{} {
+					db.Find(&rbacPermissions)
+					return map[string]any{"rbacPermissions": rbacPermissions}
+				},
+			).
+			ToGinResponse(),
+	)
+}
+
+// ListJdt jquery-dataTable后端分页数据
+func (receiver RbacPermissionController) ListJdt(ctx *gin.Context) {
+	var rbacPermissions []*models.RbacPermissionModel
+
+	ctx.JSON(
+		tools.NewCorrectWithGinContext("", ctx).
+			DataForJqueryDataTable(
+				models.RbacPermissionModel{}.GetListByQuery(ctx),
+				func(db *gorm.DB) map[string]interface{} {
+					db.Find(&rbacPermissions)
+					return map[string]any{"rbacPermissions": rbacPermissions}
 				},
 			).
 			ToGinResponse(),

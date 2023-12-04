@@ -90,7 +90,7 @@ func (AuthController) PostRegister(ctx *gin.Context) {
 
 	// 保存新用户
 	account := &models.AccountModel{
-		MysqlModel: models.MysqlModel{Uuid: uuid.NewV4().String()},
+		MySqlModel: models.MySqlModel{Uuid: uuid.NewV4().String()},
 		Username:   form.Username,
 		Password:   string(bytes),
 		Nickname:   form.Nickname,
