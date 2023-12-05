@@ -58,6 +58,25 @@ func (RbacRouter) Load(engine *gin.Engine) {
 			// jquery-dataTable数据列表
 			rbacPermissionRouter.GET(".jdt", controllers.NewRbacPermissionController().ListJdt)
 		}
+
+		rbacMenuRouter := r.Group(
+			"menu",
+			middlewares.CheckAuth(),
+		)
+		{
+			// 新建
+			rbacMenuRouter.POST("", controllers.NewRbacMenuController().Store)
+			// 删除
+			rbacMenuRouter.DELETE("/:uuid", controllers.NewRbacMenuController().Delete)
+			// 编辑
+			rbacMenuRouter.PUT("/:uuid", controllers.NewRbacMenuController().Update)
+			// 详情
+			rbacMenuRouter.GET("/:uuid", controllers.NewRbacMenuController().Detail)
+			// 列表
+			rbacMenuRouter.GET("", controllers.NewRbacMenuController().List)
+			// jquery-dataTable数据列表
+			rbacMenuRouter.GET(".jdt", controllers.NewRbacMenuController().ListJdt)
+		}
 	}
 
 }

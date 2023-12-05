@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"jericho-gin/models"
 	"jericho-gin/services"
 	"jericho-gin/tools"
@@ -29,6 +30,19 @@ type (
 		Description string `json:"description"`
 		Uri         string `json:"uri"`
 	}
+
+	// RbacMenuController 菜单控制器
+	RbacMenuController struct{}
+
+	// RbacMenuStoreForm 菜单表单
+	RbacMenuStoreForm struct {
+		Name        string `gorm:"json:name"`
+		SubTitle    string `gorm:"json:subTitle"`
+		Description string `gorm:"json:description"`
+		Uri         string `gorm:"json:uri"`
+		ParentUuid  string `gorm:"json:parentUuid"`
+		parentMenu  *models.RbacMenuModel
+	}
 )
 
 // ShouldBind 角色表单绑定
@@ -55,6 +69,24 @@ func (receiver RbacPermissionStoreForm) ShouldBind(ctx *gin.Context) RbacPermiss
 	}
 	if receiver.Uri == "" {
 		wrongs.ThrowValidate("权限路由必填")
+	}
+
+	return receiver
+}
+
+// ShouldBind 菜单表单绑定
+func (receiver RbacMenuStoreForm) ShouldBind(ctx *gin.Context) RbacMenuStoreForm {
+	var ret *gorm.DB
+
+	if err := ctx.ShouldBind(&receiver); err != nil {
+		wrongs.ThrowValidate(err.Error())
+	}
+	if receiver.Name == "" {
+		wrongs.ThrowValidate("菜单名称必填")
+	}
+	if receiver.ParentUuid != "" {
+		ret = models.NewRbacMenuModel().GetDb("").Where("uuid =?", receiver.ParentUuid).First(&receiver.parentMenu)
+		wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("父级菜单（%s）", receiver.ParentUuid))
 	}
 
 	return receiver
@@ -356,6 +388,162 @@ func (receiver RbacPermissionController) ListJdt(ctx *gin.Context) {
 				func(db *gorm.DB) map[string]interface{} {
 					db.Find(&rbacPermissions)
 					return map[string]any{"rbacPermissions": rbacPermissions}
+				},
+			).
+			ToGinResponse(),
+	)
+}
+
+// NewRbacMenuController 构造函数
+func NewRbacMenuController() *RbacMenuController {
+	return &RbacMenuController{}
+}
+
+// Store 新建
+func (RbacMenuController) Store(ctx *gin.Context) {
+	var (
+		ret    *gorm.DB
+		repeat models.RbacMenuModel
+	)
+
+	// 表单
+	form := RbacMenuStoreForm{}.ShouldBind(ctx)
+
+	// 查重
+	ret = models.NewRbacMenuModel().
+		GetDb("").
+		Where("name = ?", form.Name).
+		Where("parent_uuid = ?", form.ParentUuid).
+		First(&repeat)
+	wrongs.ThrowWhenIsRepeat(ret, "菜单名称")
+
+	// 新建
+	rbacMenu := &models.RbacMenuModel{
+		MySqlModel:  models.MySqlModel{Uuid: uuid.NewV4().String()},
+		Name:        form.Name,
+		SubTitle:    form.SubTitle,
+		Description: &form.Description,
+		Uri:         form.Uri,
+		ParentUuid:  form.ParentUuid,
+	}
+	if ret = models.NewRbacMenuModel().
+		GetDb("").
+		Create(&rbacMenu); ret.Error != nil {
+		wrongs.ThrowForbidden(ret.Error.Error())
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Created(map[string]any{"rbacMenu": rbacMenu}).ToGinResponse())
+}
+
+// Delete 删除
+func (RbacMenuController) Delete(ctx *gin.Context) {
+	var (
+		ret      *gorm.DB
+		rbacMenu models.RbacMenuModel
+	)
+
+	// 查询
+	ret = models.NewRbacMenuModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		First(&rbacMenu)
+	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+
+	// 删除
+	if ret := models.NewRbacMenuModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		Delete(&rbacMenu); ret.Error != nil {
+		wrongs.ThrowForbidden(ret.Error.Error())
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Deleted().ToGinResponse())
+}
+
+// Update 编辑
+func (RbacMenuController) Update(ctx *gin.Context) {
+	var (
+		ret              *gorm.DB
+		rbacMenu, repeat models.RbacMenuModel
+	)
+
+	// 表单
+	form := RbacMenuStoreForm{}.ShouldBind(ctx)
+
+	// 查重
+	ret = models.NewRbacMenuModel().
+		GetDb("").
+		Where("name = ? and parent_uuid <> ?", form.Name, form.ParentUuid).
+		First(&repeat)
+	wrongs.ThrowWhenIsRepeat(ret, "菜单名称")
+
+	// 查询
+	ret = models.NewRbacMenuModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		First(&rbacMenu)
+	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+
+	// 编辑
+	rbacMenu.Name = form.Name
+	rbacMenu.SubTitle = form.SubTitle
+	rbacMenu.Description = &form.Description
+	rbacMenu.Uri = form.Uri
+	rbacMenu.ParentUuid = form.parentMenu.Uuid
+	if ret = models.NewRbacMenuModel().
+		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		Save(&rbacMenu); ret.Error != nil {
+		wrongs.ThrowForbidden(ret.Error.Error())
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Updated(map[string]any{"rbacMenu": rbacMenu}).ToGinResponse())
+}
+
+// Detail 详情
+func (RbacMenuController) Detail(ctx *gin.Context) {
+	var (
+		ret      *gorm.DB
+		rbacMenu models.RbacMenuModel
+	)
+	ret = models.NewRbacMenuModel().
+		SetCtx(ctx).
+		GetDbUseQuery("").
+		Where("uuid = ?", ctx.Param("uuid")).
+		First(&rbacMenu)
+	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbacMenu": rbacMenu}).ToGinResponse())
+}
+
+// List 列表
+func (receiver RbacMenuController) List(ctx *gin.Context) {
+	var rbacMenus []*models.RbacMenuModel
+
+	ctx.JSON(
+		tools.NewCorrectWithGinContext("", ctx).
+			DataForPager(
+				models.RbacMenuModel{}.GetListByQuery(ctx),
+				func(db *gorm.DB) map[string]interface{} {
+					db.Find(&rbacMenus)
+					return map[string]any{"rbacMenus": rbacMenus}
+				},
+			).
+			ToGinResponse(),
+	)
+}
+
+// ListJdt jquery-dataTable后端分页数据
+func (receiver RbacMenuController) ListJdt(ctx *gin.Context) {
+	var rbacMenus []*models.RbacMenuModel
+
+	ctx.JSON(
+		tools.NewCorrectWithGinContext("", ctx).
+			DataForJqueryDataTable(
+				models.RbacMenuModel{}.GetListByQuery(ctx),
+				func(db *gorm.DB) map[string]interface{} {
+					db.Find(&rbacMenus)
+					return map[string]any{"rbacMenus": rbacMenus}
 				},
 			).
 			ToGinResponse(),

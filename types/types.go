@@ -2,6 +2,7 @@ package types
 
 import (
 	"reflect"
+	"strings"
 )
 
 type MapStringToAny = map[string]any
@@ -147,4 +148,29 @@ func (receiver *MapString) GetKeys(value MapStringToAny) ListString {
 	}
 
 	return keys
+}
+
+// IsTrue 判断字符串是否代表true
+func IsTrue(value string) bool {
+	switch strings.ToLower(value) {
+	case "1":
+	case "true":
+	case "on":
+	case "yes":
+		return true
+	}
+
+	return false
+}
+
+// IsFalse 判断字符串是否代表false
+func IsFalse(value string) bool {
+	switch strings.ToLower(value) {
+	case "0":
+	case "false":
+	case "off":
+	case "no":
+		return true
+	}
+	return false
 }

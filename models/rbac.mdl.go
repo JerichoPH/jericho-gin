@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"jericho-gin/types"
 )
 
 type (
@@ -30,6 +31,9 @@ type (
 		Description *string          `gorm:"type:text;comment:菜单描述" json:"description"`
 		Uri         string           `gorm:"type:varchar(255);not null;default:'';comment:菜单所属路由" json:"uri"`
 		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbacRoles"`
+		ParentUuid  string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parentUuid"`
+		ParentMenu  *RbacMenuModel   `gorm:"foreignKey:uuid;references:parent_uuid;comment:所属父级;" json:"parentMenu"`
+		SubMenus    []*RbacMenuModel `gorm:"foreignKey:uuid;references:parent_uuid;comment:相关子集;" json:"subMenus"`
 	}
 
 	PivotRbacRoleAccountModel struct {
@@ -120,6 +124,27 @@ func (RbacMenuModel) TableName() string {
 // NewRbacMenuModel 返回一个新的 RbacMenuModel 模型实例指针
 func NewRbacMenuModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&RbacMenuModel{})
+}
+
+// GetListByQuery 根据Query获取菜单列表
+func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
+	return NewRbacMenuModel().
+		SetWheresExtraHasValue(map[string]func(string, *gorm.DB) *gorm.DB{
+			"be_enable": func(value string, db *gorm.DB) *gorm.DB {
+				if types.IsTrue(value) {
+					db.Where("be_enable", true)
+				}
+				if types.IsFalse(value) {
+					db.Where("be_enable", false)
+				}
+				return db
+			},
+		}).
+		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{}).
+		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
+		SetCtx(ctx).
+		GetDbUseQuery("").
+		Table("rbac_menus as rm")
 }
 
 // TableName 角色与用户对应关系表名称
