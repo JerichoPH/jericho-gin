@@ -403,7 +403,7 @@ func NewRbacMenuController() *RbacMenuController {
 func (RbacMenuController) Store(ctx *gin.Context) {
 	var (
 		ret    *gorm.DB
-		repeat models.RbacMenuModel
+		repeat *models.RbacMenuModel
 	)
 
 	// 表单
@@ -464,7 +464,7 @@ func (RbacMenuController) Delete(ctx *gin.Context) {
 func (RbacMenuController) Update(ctx *gin.Context) {
 	var (
 		ret              *gorm.DB
-		rbacMenu, repeat models.RbacMenuModel
+		rbacMenu, repeat *models.RbacMenuModel
 	)
 
 	// 表单
@@ -473,7 +473,9 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 	// 查重
 	ret = models.NewRbacMenuModel().
 		GetDb("").
-		Where("name = ? and parent_uuid <> ?", form.Name, form.ParentUuid).
+		Where("name", form.Name).
+		Where("uuid <> ?", ctx.Param("uuid")).
+		Where("parent_uuid <> ?", form.ParentUuid).
 		First(&repeat)
 	wrongs.ThrowWhenIsRepeat(ret, "菜单名称")
 
@@ -483,13 +485,18 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacMenu)
 	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+	if form.ParentUuid != "" {
+		if rbacMenu.ParentUuid == form.ParentUuid {
+			wrongs.ThrowValidate("父级菜单不能是自己")
+		}
+	}
 
 	// 编辑
 	rbacMenu.Name = form.Name
 	rbacMenu.SubTitle = form.SubTitle
 	rbacMenu.Description = &form.Description
 	rbacMenu.Uri = form.Uri
-	rbacMenu.ParentUuid = form.parentMenu.Uuid
+	rbacMenu.ParentUuid = form.ParentUuid
 	if ret = models.NewRbacMenuModel().
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).

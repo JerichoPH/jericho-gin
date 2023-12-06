@@ -139,8 +139,21 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 				}
 				return db
 			},
+			"name": func(value string, db *gorm.DB) *gorm.DB {
+				return db.Where(fmt.Sprintf("name like '%%%s%%'", value))
+			},
+			"uri": func(value string, db *gorm.DB) *gorm.DB {
+				return db.Where("uri", value)
+			},
 		}).
-		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{}).
+		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{
+			"names[]": func(values []string, db *gorm.DB) *gorm.DB {
+				return db.Where("name in (?)", values)
+			},
+			"uris[]": func(values []string, db *gorm.DB) *gorm.DB {
+				return db.Where("uri in (?)", values)
+			},
+		}).
 		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
 		SetCtx(ctx).
 		GetDbUseQuery("").
@@ -149,7 +162,7 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 
 // TableName 角色与用户对应关系表名称
 func (PivotRbacRoleAccountModel) TableName() string {
-	return "pivot_rbac_rolse__accounts"
+	return "pivot_rbac_roles__accounts"
 }
 
 // NewPivotRbacRoleAccountModel 返回一个新的 PivotRbacRoleAccountModel 模型实例
@@ -169,7 +182,7 @@ func NewPivotRbacRoleRbacPermissionModel() *MySqlModel {
 
 // TableName 角色与菜单对应关系表名称
 func (PivotRbacRoleRbacMenuModel) TableName() string {
-	return "pivot_rbac_role__rbac_menus"
+	return "pivot_rbac_roles__rbac_menus"
 }
 
 // NewPivotRbacRoleRbacMenuModel 返回一个新的 PivotRbacRoleRbacMenuModel 模型的实例。
