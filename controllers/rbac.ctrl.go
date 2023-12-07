@@ -439,7 +439,8 @@ func (RbacMenuController) Store(ctx *gin.Context) {
 func (RbacMenuController) Delete(ctx *gin.Context) {
 	var (
 		ret      *gorm.DB
-		rbacMenu models.RbacMenuModel
+		rbacMenu *models.RbacMenuModel
+		subs     = make(map[string]map[string]string)
 	)
 
 	// 查询
@@ -448,6 +449,11 @@ func (RbacMenuController) Delete(ctx *gin.Context) {
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacMenu)
 	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+	// 查询该菜单下是否存在子集
+	subs = rbacMenu.GetSubUuidsByParentUuid(rbacMenu.Uuid)
+	if len(subs) > 0 {
+		wrongs.ThrowForbidden("该菜单下存在子集，请先删除子集")
+	}
 
 	// 删除
 	if ret := models.NewRbacMenuModel().
@@ -465,6 +471,7 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 	var (
 		ret              *gorm.DB
 		rbacMenu, repeat *models.RbacMenuModel
+		subs             map[string]map[string]string
 	)
 
 	// 表单
@@ -473,9 +480,9 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 	// 查重
 	ret = models.NewRbacMenuModel().
 		GetDb("").
-		Where("name", form.Name).
+		Where("name = ? and uuid <> ?", form.Name, ctx.Param("uuid")).
 		Where("uuid <> ?", ctx.Param("uuid")).
-		Where("parent_uuid <> ?", form.ParentUuid).
+		Where("parent_uuid <> ?", form.ParentUuid).Debug().
 		First(&repeat)
 	wrongs.ThrowWhenIsRepeat(ret, "菜单名称")
 
@@ -488,6 +495,13 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 	if form.ParentUuid != "" {
 		if rbacMenu.ParentUuid == form.ParentUuid {
 			wrongs.ThrowValidate("父级菜单不能是自己")
+		}
+	}
+	// 查询所有子菜单
+	subs = models.RbacMenuModel{}.GetSubUuidsByParentUuid(rbacMenu.Uuid)
+	if len(subs) > 0 && form.ParentUuid != "" {
+		if sub, exist := subs[form.ParentUuid]; exist {
+			wrongs.ThrowValidate("「%s」是「%s」的父级，不能将子集绑定为子集的父级", form.Name, sub["name"])
 		}
 	}
 

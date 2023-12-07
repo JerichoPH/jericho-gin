@@ -1,10 +1,12 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"jericho-gin/settings"
 	"jericho-gin/wrongs"
 	"os"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -98,4 +100,17 @@ func (receiver *GormLauncher) NewConn(dbConnName string) (dbSession *gorm.DB) {
 		wrongs.ThrowForbidden("没有配置数据库")
 	}
 	return
+}
+
+// ExecSql 执行sql语句
+func ExecSql(sqlList []string, params []any) *sql.Rows {
+	if rows, err := NewGormLauncher().
+		GetConn("").
+		Raw(strings.Join(sqlList, "\r\n"), params...).
+		Rows(); err != nil {
+		wrongs.ThrowForbidden(err.Error())
+	} else {
+		return rows
+	}
+	return nil
 }

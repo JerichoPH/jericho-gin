@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"jericho-gin/database"
 	"jericho-gin/types"
+	"jericho-gin/wrongs"
 )
 
 type (
@@ -32,8 +34,8 @@ type (
 		Uri         string           `gorm:"type:varchar(255);not null;default:'';comment:菜单所属路由" json:"uri"`
 		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbacRoles"`
 		ParentUuid  string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parentUuid"`
-		ParentMenu  *RbacMenuModel   `gorm:"foreignKey:uuid;references:parent_uuid;comment:所属父级;" json:"parentMenu"`
-		SubMenus    []*RbacMenuModel `gorm:"foreignKey:uuid;references:parent_uuid;comment:相关子集;" json:"subMenus"`
+		Parent      *RbacMenuModel   `gorm:"foreignKey:parent_uuid;references:uuid;comment:所属父级;" json:"parent"`
+		Subs        []*RbacMenuModel `gorm:"foreignKey:parent_uuid;references:uuid;comment:相关子集;" json:"subs"`
 	}
 
 	PivotRbacRoleAccountModel struct {
@@ -128,6 +130,18 @@ func NewRbacMenuModel() *MySqlModel {
 
 // GetListByQuery 根据Query获取菜单列表
 func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
+	var (
+		notHasSubs = ctx.Query("not_has_subs")
+		subs       = make(map[string]map[string]string)
+		subUuids   = make([]string, 0)
+	)
+	if notHasSubs != "" {
+		subs = receiver.GetSubUuidsByParentUuid(notHasSubs)
+		for _, sub := range subs {
+			subUuids = append(subUuids, sub["uuid"])
+		}
+	}
+
 	return NewRbacMenuModel().
 		SetWheresExtraHasValue(map[string]func(string, *gorm.DB) *gorm.DB{
 			"be_enable": func(value string, db *gorm.DB) *gorm.DB {
@@ -145,6 +159,9 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 			"uri": func(value string, db *gorm.DB) *gorm.DB {
 				return db.Where("uri", value)
 			},
+			"not_has_subs": func(value string, db *gorm.DB) *gorm.DB {
+				return db.Where("uuid not in ?", subUuids)
+			},
 		}).
 		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{
 			"names[]": func(values []string, db *gorm.DB) *gorm.DB {
@@ -158,6 +175,43 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 		SetCtx(ctx).
 		GetDbUseQuery("").
 		Table("rbac_menus as rm")
+}
+
+// GetSubUuidsByParentUuid 根据父级uuid获取所有子集uuid
+func (receiver RbacMenuModel) GetSubUuidsByParentUuid(parentUuid string) map[string]map[string]string {
+	if rows := database.ExecSql([]string{
+		"WITH RECURSIVE cte AS (",
+		"SELECT uuid, name, NULL AS parent_uuid",
+		"FROM rbac_menus",
+		"WHERE parent_uuid = ?",
+		"AND deleted_at IS NULL",
+		"UNION ALL",
+		"SELECT m.uuid, m.name, c.parent_uuid",
+		"FROM rbac_menus m INNER JOIN cte c ON m.parent_uuid = c.uuid",
+		"WHERE m.deleted_at IS NULL",
+		")",
+		"SELECT uuid, name FROM cte",
+	}, []any{parentUuid}); rows != nil {
+		var (
+			subs = make(map[string]map[string]string)
+			err  error
+		)
+		for rows.Next() {
+			var (
+				uuid string
+				name string
+			)
+			if err = rows.Scan(&uuid, &name); err != nil {
+				wrongs.ThrowForbidden(err.Error())
+			}
+			subs[uuid] = map[string]string{
+				"uuid": uuid,
+				"name": name,
+			}
+		}
+		return subs
+	}
+	return map[string]map[string]string{}
 }
 
 // TableName 角色与用户对应关系表名称
