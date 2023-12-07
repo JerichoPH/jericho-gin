@@ -133,8 +133,9 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 	var (
 		notHasSubs = ctx.Query("not_has_subs")
 		subs       = make(map[string]map[string]string)
-		subUuids   = make([]string, 0)
+		subUuids   []string
 	)
+	subUuids = make([]string, 0)
 	if notHasSubs != "" {
 		subs = receiver.GetSubUuidsByParentUuid(notHasSubs)
 		for _, sub := range subs {
@@ -160,6 +161,9 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 				return db.Where("uri", value)
 			},
 			"not_has_subs": func(value string, db *gorm.DB) *gorm.DB {
+				if len(subUuids) == 0 {
+					return db
+				}
 				return db.Where("uuid not in ?", subUuids)
 			},
 		}).
@@ -173,7 +177,7 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 		}).
 		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
 		SetCtx(ctx).
-		GetDbUseQuery("").
+		GetDbUseQuery("").Debug().
 		Table("rbac_menus as rm")
 }
 
