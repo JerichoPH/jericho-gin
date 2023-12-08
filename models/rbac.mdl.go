@@ -54,14 +54,14 @@ type (
 	}
 )
 
-// TableName 角色表名称
-func (RbacRoleModel) TableName() string {
-	return "rbac_roles"
-}
-
 // NewRbacRoleModel 创建一个新的 RBAC 角色模型
 func NewRbacRoleModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&RbacRoleModel{})
+}
+
+// TableName 角色表名称
+func (RbacRoleModel) TableName() string {
+	return "rbac_roles"
 }
 
 // GetListByQuery 根据Query获取角色列表
@@ -82,14 +82,14 @@ func (receiver RbacRoleModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 		Table("rbac_roles as rr")
 }
 
-// TableName 权限表名称
-func (RbacPermissionModel) TableName() string {
-	return "rbac_permissions"
-}
-
 // NewRbacPermissionModel 返回一个新的 RbacPermissionModel 模型实例化的指针
 func NewRbacPermissionModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&RbacPermissionModel{})
+}
+
+// TableName 权限表名称
+func (RbacPermissionModel) TableName() string {
+	return "rbac_permissions"
 }
 
 // GetListByQuery 根据Query获取权限列表
@@ -100,7 +100,10 @@ func (receiver RbacPermissionModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 				return db.Where(fmt.Sprintf("rp.name like '%%%s%%'", value))
 			},
 			"rbac_role_uuid": func(value string, db *gorm.DB) *gorm.DB {
-				return db.Where("rr.uuid =?", value)
+				return db.
+					Joins("left join pivot_rbac_roles__rbac_permissions prrrp on rp.uuid = prrrp.rbac_permission_uuid").
+					Joins("left join rbac_roles rr on prrrp.rbac_role_uuid = rr.uuid").
+					Where("rr.uuid =?", value)
 			},
 		}).
 		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{
@@ -108,24 +111,25 @@ func (receiver RbacPermissionModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 				return db.Where("rp.name in (?)", values)
 			},
 			"rbac_role_uuids[]": func(values []string, db *gorm.DB) *gorm.DB {
-				return db.Where("rr.uuid in (?)", values)
+				return db.
+					Joins("left join pivot_rbac_roles__rbac_permissions prrrp on rp.uuid = prrrp.rbac_permission_uuid").
+					Joins("left join rbac_roles rr on prrrp.rbac_role_uuid = rr.uuid").
+					Where("rr.uuid in (?)", values)
 			},
 		}).
 		SetCtx(ctx).
 		GetDbUseQuery("").
-		Table("rbac_permissions as rp").
-		Joins("left join pivot_rbac_roles__rbac_permissions prrrp on rp.uuid = prrrp.rbac_permission_uuid").
-		Joins("left join rbac_roles rr on prrrp.rbac_role_uuid = rr.uuid").Debug()
-}
-
-// TableName 菜单表名称
-func (RbacMenuModel) TableName() string {
-	return "rbac_menus"
+		Table("rbac_permissions as rp")
 }
 
 // NewRbacMenuModel 返回一个新的 RbacMenuModel 模型实例指针
 func NewRbacMenuModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&RbacMenuModel{})
+}
+
+// TableName 菜单表名称
+func (RbacMenuModel) TableName() string {
+	return "rbac_menus"
 }
 
 // GetListByQuery 根据Query获取菜单列表
@@ -218,19 +222,29 @@ func (receiver RbacMenuModel) GetSubUuidsByParentUuid(parentUuid string) map[str
 	return map[string]map[string]string{}
 }
 
-// TableName 角色与用户对应关系表名称
-func (PivotRbacRoleAccountModel) TableName() string {
-	return "pivot_rbac_roles__accounts"
-}
-
 // NewPivotRbacRoleAccountModel 返回一个新的 PivotRbacRoleAccountModel 模型实例
 func NewPivotRbacRoleAccountModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&PivotRbacRoleAccountModel{})
 }
 
-// TableName 角色与权限对应关系表名称
-func (PivotRbacRoleRbacPermissionModel) TableName() string {
-	return "pivot_rbac_roles__rbac_permissions"
+// TableName 角色与用户对应关系表名称
+func (PivotRbacRoleAccountModel) TableName() string {
+	return "pivot_rbac_roles__accounts"
+}
+
+// BindRbacRoles 绑定角色与用户
+func (PivotRbacRoleAccountModel) BindRbacRoles(rbacRole *RbacRoleModel, accounts []*AccountModel) {
+	database.NewGormLauncher().GetConn("").Table("pivot_rbac_roles__accounts").Where("rbac_role_uuid", rbacRole.Uuid).Delete(nil)
+	if len(accounts) > 0 {
+		for _, account := range accounts {
+			NewPivotRbacRoleAccountModel().
+				GetDb("").
+				Create(&PivotRbacRoleAccountModel{
+					RbacRoleUuid: rbacRole.Uuid,
+					AccountUuid:  account.Uuid,
+				})
+		}
+	}
 }
 
 // NewPivotRbacRoleRbacPermissionModel 返回一个新的 PivotRbacRoleRbacPermissionModel 模型的实例。
@@ -238,12 +252,49 @@ func NewPivotRbacRoleRbacPermissionModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&PivotRbacRoleRbacPermissionModel{})
 }
 
-// TableName 角色与菜单对应关系表名称
-func (PivotRbacRoleRbacMenuModel) TableName() string {
-	return "pivot_rbac_roles__rbac_menus"
+// TableName 角色与权限对应关系表名称
+func (PivotRbacRoleRbacPermissionModel) TableName() string {
+	return "pivot_rbac_roles__rbac_permissions"
+}
+
+// BindRbacRoles 绑定角色与权限
+func (PivotRbacRoleRbacPermissionModel) BindRbacRoles(rbacPermission *RbacPermissionModel, rbacRoles []*RbacRoleModel) {
+	database.NewGormLauncher().GetConn("").Table("pivot_rbac_roles__rbac_permissions").Where("rbac_permission_uuid", rbacPermission.Uuid).Delete(nil)
+	if len(rbacRoles) > 0 {
+		for _, rbacRole := range rbacRoles {
+			NewPivotRbacRoleRbacPermissionModel().
+				GetDb("").
+				Create(&PivotRbacRoleRbacPermissionModel{
+					RbacRoleUuid:       rbacRole.Uuid,
+					RbacPermissionUuid: rbacPermission.Uuid,
+				})
+		}
+	}
 }
 
 // NewPivotRbacRoleRbacMenuModel 返回一个新的 PivotRbacRoleRbacMenuModel 模型的实例。
 func NewPivotRbacRoleRbacMenuModel() *MySqlModel {
 	return NewMySqlModel().SetModel(&PivotRbacRoleRbacMenuModel{})
+}
+
+// TableName 角色与菜单对应关系表名称
+func (PivotRbacRoleRbacMenuModel) TableName() string {
+	return "pivot_rbac_roles__rbac_menus"
+}
+
+// BindRbacRoles 绑定角色与菜单
+func (PivotRbacRoleRbacMenuModel) BindRbacRoles(rbacMenu *RbacMenuModel, rbacRoles []*RbacRoleModel) {
+	var pivotRbacRoleRbacMenus = make([]*PivotRbacRoleRbacMenuModel, 0)
+	database.NewGormLauncher().GetConn("").Table("pivot_rbac_roles__rbac_menus").Where("rbac_menu_uuid = ?", rbacMenu.Uuid).Delete(nil)
+
+	if len(rbacRoles) > 0 {
+		for _, rbacRole := range rbacRoles {
+			pivotRbacRoleRbacMenus = append(pivotRbacRoleRbacMenus, &PivotRbacRoleRbacMenuModel{
+				RbacRoleUuid: rbacRole.Uuid,
+				RbacMenuUuid: rbacMenu.Uuid,
+			})
+		}
+	}
+
+	NewPivotRbacRoleRbacMenuModel().GetDb("").Create(&pivotRbacRoleRbacMenus)
 }

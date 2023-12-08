@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"jericho-gin/models"
-	"jericho-gin/services"
 	"jericho-gin/tools"
 	"jericho-gin/wrongs"
 
@@ -26,9 +25,11 @@ type (
 
 	// RbacPermissionStoreForm 权限表单
 	RbacPermissionStoreForm struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Uri         string `json:"uri"`
+		Name          string   `json:"name"`
+		Description   string   `json:"description"`
+		Uri           string   `json:"uri"`
+		RbacRoleUuids []string `json:"rbac_role_uuids"`
+		rbacRoles     []*models.RbacRoleModel
 	}
 
 	// RbacMenuController 菜单控制器
@@ -69,6 +70,9 @@ func (receiver RbacPermissionStoreForm) ShouldBind(ctx *gin.Context) RbacPermiss
 	}
 	if receiver.Uri == "" {
 		wrongs.ThrowValidate("权限路由必填")
+	}
+	if len(receiver.RbacRoleUuids) > 0 {
+		models.NewRbacRoleModel().GetDb("").Where("uuid in ?", receiver.RbacRoleUuids).Find(&receiver.rbacRoles)
 	}
 
 	return receiver
@@ -306,7 +310,7 @@ func (RbacPermissionController) Delete(ctx *gin.Context) {
 func (RbacPermissionController) Update(ctx *gin.Context) {
 	var (
 		ret                    *gorm.DB
-		rbacPermission, repeat models.RbacPermissionModel
+		rbacPermission, repeat *models.RbacPermissionModel
 	)
 
 	// 表单
@@ -317,7 +321,7 @@ func (RbacPermissionController) Update(ctx *gin.Context) {
 		GetDb("").
 		Where("name = ? and uuid <> ?", form.Name, ctx.Param("uuid")).
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "权限名称")
+	wrongs.ThrowWhenIsRepeat(ret, fmt.Sprintf("权限名称 %s %s", ctx.Param("uuid"), repeat.Uuid))
 
 	// 查询
 	ret = models.NewRbacPermissionModel().
@@ -337,6 +341,9 @@ func (RbacPermissionController) Update(ctx *gin.Context) {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
 
+	// 绑定角色与权限
+	models.PivotRbacRoleRbacPermissionModel{}.BindRbacRoles(rbacPermission, form.rbacRoles)
+
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Updated(map[string]any{"rbac_permission": rbacPermission}).ToGinResponse())
 }
 
@@ -354,10 +361,6 @@ func (RbacPermissionController) Detail(ctx *gin.Context) {
 	wrongs.ThrowWhenIsEmpty(ret, "权限")
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbac_permission": rbacPermission}).ToGinResponse())
-}
-
-func (RbacPermissionController) listUseQuery(ctx *gin.Context) *gorm.DB {
-	return services.NewRbacPermissionService(services.BaseService{Model: models.NewRbacPermissionModel().SetModel(models.RbacPermissionModel{}), Ctx: ctx}).GetListByQuery()
 }
 
 // List 列表
