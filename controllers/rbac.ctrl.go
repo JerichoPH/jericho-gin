@@ -37,12 +37,14 @@ type (
 
 	// RbacMenuStoreForm 菜单表单
 	RbacMenuStoreForm struct {
-		Name        string `gorm:"json:name"`
-		SubTitle    string `gorm:"json:subTitle"`
-		Description string `gorm:"json:description"`
-		Uri         string `gorm:"json:uri"`
-		ParentUuid  string `gorm:"json:parent_uuid"`
-		parentMenu  *models.RbacMenuModel
+		Name          string `gorm:"json:name"`
+		SubTitle      string `gorm:"json:subTitle"`
+		Description   string `gorm:"json:description"`
+		Uri           string `gorm:"json:uri"`
+		ParentUuid    string `gorm:"json:parent_uuid"`
+		parentMenu    *models.RbacMenuModel
+		RbacRoleUuids []string `gorm:"json:rbac_role_uuids"`
+		rbacRoles     []*models.RbacRoleModel
 	}
 )
 
@@ -278,6 +280,9 @@ func (RbacPermissionController) Store(ctx *gin.Context) {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
 
+	// 绑定角色与权限
+	models.PivotRbacRoleRbacPermissionModel{}.BindRbacRoles(rbacPermission, form.rbacRoles)
+
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Created(map[string]any{"rbac_permission": rbacPermission}).ToGinResponse())
 }
 
@@ -435,6 +440,9 @@ func (RbacMenuController) Store(ctx *gin.Context) {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
 
+	// 绑定角色与菜单
+	models.PivotRbacRoleRbacMenuModel{}.BindRbacRoles(rbacMenu, form.rbacRoles)
+
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Created(map[string]any{"rbac_menu": rbacMenu}).ToGinResponse())
 }
 
@@ -520,6 +528,9 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 		Save(&rbacMenu); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
+
+	// 绑定角色与菜单
+	models.PivotRbacRoleRbacMenuModel{}.BindRbacRoles(rbacMenu, form.rbacRoles)
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Updated(map[string]any{"rbac_menu": rbacMenu}).ToGinResponse())
 }
