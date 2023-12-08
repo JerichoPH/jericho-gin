@@ -14,8 +14,8 @@ type (
 		MySqlModel
 		Name            string                 `gorm:"type:varchar(64);not null;comment:角色名称;" json:"name"`
 		Accounts        []*AccountModel        `gorm:"many2many:pivot_rbac_roles__accounts;foreignKey:uuid;joinForeignKey:rbac_role_uuid;references:uuid;joinReferences:accountUuid;" json:"accounts"`
-		RbacPermissions []*RbacPermissionModel `gorm:"many2many:pivot_rbac_roles__rbac_permissions;foreignKey:uuid;joinForeignKey:rbac_role_uuid;references:uuid;joinReferences:rbacPermissionUuid;" json:"rbacPermissions"`
-		RbacMenus       []*RbacMenuModel       `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_role_uuid;references:uuid;joinReferences:rbacMenuUuid;" json:"rbacMenus"`
+		RbacPermissions []*RbacPermissionModel `gorm:"many2many:pivot_rbac_roles__rbac_permissions;foreignKey:uuid;joinForeignKey:rbac_role_uuid;references:uuid;joinReferences:rbacPermissionUuid;" json:"rbac_permissions"`
+		RbacMenus       []*RbacMenuModel       `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_role_uuid;references:uuid;joinReferences:rbacMenuUuid;" json:"rbac_menus"`
 	}
 
 	RbacPermissionModel struct {
@@ -23,34 +23,34 @@ type (
 		Name        string           `gorm:"type:varchar(64);not null;comment:权限名称;" json:"name"`
 		Description *string          `gorm:"type:text;comment:权限描述;" json:"description"`
 		Uri         string           `gorm:"type:varchar(255);not null;default:'';comment:权限所属路由;" json:"uri"`
-		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_permissions;foreignKey:uuid;joinForeignKey:rbac_permission_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbacRoles"`
+		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_permissions;foreignKey:uuid;joinForeignKey:rbac_permission_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
 	}
 
 	RbacMenuModel struct {
 		MySqlModel
 		Name        string           `gorm:"type:varchar(64);not null;comment:菜单名称" json:"name"`
-		SubTitle    string           `gorm:"type:varchar(255);not null;default:'';comment:菜单副标题" json:"subTitle"`
+		SubTitle    string           `gorm:"type:varchar(255);not null;default:'';comment:菜单副标题" json:"sub_title"`
 		Description *string          `gorm:"type:text;comment:菜单描述" json:"description"`
 		Uri         string           `gorm:"type:varchar(255);not null;default:'';comment:菜单所属路由" json:"uri"`
-		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbacRoles"`
-		ParentUuid  string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parentUuid"`
+		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
+		ParentUuid  string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parent_uuid"`
 		Parent      *RbacMenuModel   `gorm:"foreignKey:parent_uuid;references:uuid;comment:所属父级;" json:"parent"`
 		Subs        []*RbacMenuModel `gorm:"foreignKey:parent_uuid;references:uuid;comment:相关子集;" json:"subs"`
 	}
 
 	PivotRbacRoleAccountModel struct {
-		RbacRoleUuid string `gorm:"type:varchar(36);not null;default:'';comment:角色uuid" json:"rbacRoleUuid"`
-		AccountUuid  string `gorm:"type:varchar(36);not null;default:'';comment:用户uuid" json:"accountUuid"`
+		RbacRoleUuid string `gorm:"type:varchar(36);not null;default:'';comment:角色uuid" json:"rbac_role_uuid"`
+		AccountUuid  string `gorm:"type:varchar(36);not null;default:'';comment:用户uuid" json:"account_uuid"`
 	}
 
 	PivotRbacRoleRbacPermissionModel struct {
-		RbacRoleUuid       string `gorm:"type:varchar(36);not null;default:'';comment:角色uuid" json:"rbacRoleUuid"`
-		RbacPermissionUuid string `gorm:"type:varchar(36);not null;default:'';comment:权限uuid" json:"rbacPermissionUuid"`
+		RbacRoleUuid       string `gorm:"type:varchar(36);not null;default:'';comment:角色uuid" json:"rbac_role_uuid"`
+		RbacPermissionUuid string `gorm:"type:varchar(36);not null;default:'';comment:权限uuid" json:"rbac_permission_uuid"`
 	}
 
 	PivotRbacRoleRbacMenuModel struct {
-		RbacRoleUuid string `gorm:"type:varchar(36);not null;default:'';comment:角色uuid" json:"rbacRoleUuid"`
-		RbacMenuUuid string `gorm:"type:varchar(36);not null;default:'';comment:菜单uuid" json:"rbacMenuUuid"`
+		RbacRoleUuid string `gorm:"type:varchar(36);not null;default:'';comment:角色uuid" json:"rbac_role_uuid"`
+		RbacMenuUuid string `gorm:"type:varchar(36);not null;default:'';comment:菜单uuid" json:"rbac_menu_uuid"`
 	}
 )
 
