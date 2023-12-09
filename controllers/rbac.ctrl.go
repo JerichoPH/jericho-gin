@@ -37,13 +37,13 @@ type (
 
 	// RbacMenuStoreForm 菜单表单
 	RbacMenuStoreForm struct {
-		Name          string `gorm:"json:name"`
-		SubTitle      string `gorm:"json:subTitle"`
-		Description   string `gorm:"json:description"`
-		Uri           string `gorm:"json:uri"`
-		ParentUuid    string `gorm:"json:parent_uuid"`
+		Name          string `json:"name"`
+		SubTitle      string `json:"sub_title"`
+		Description   string `json:"description"`
+		Uri           string `json:"uri"`
+		ParentUuid    string `json:"parent_uuid"`
 		parentMenu    *models.RbacMenuModel
-		RbacRoleUuids []string `gorm:"json:rbac_role_uuids"`
+		RbacRoleUuids []string `json:"rbac_role_uuids"`
 		rbacRoles     []*models.RbacRoleModel
 	}
 )
@@ -91,8 +91,11 @@ func (receiver RbacMenuStoreForm) ShouldBind(ctx *gin.Context) RbacMenuStoreForm
 		wrongs.ThrowValidate("菜单名称必填")
 	}
 	if receiver.ParentUuid != "" {
-		ret = models.NewRbacMenuModel().GetDb("").Where("uuid =?", receiver.ParentUuid).First(&receiver.parentMenu)
+		ret = models.NewRbacMenuModel().GetDb("").Where("uuid = ?", receiver.ParentUuid).First(&receiver.parentMenu)
 		wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("父级菜单（%s）", receiver.ParentUuid))
+	}
+	if len(receiver.RbacRoleUuids) > 0 {
+		models.NewRbacRoleModel().GetDb("").Where("uuid in ?", receiver.RbacRoleUuids).Find(&receiver.rbacRoles)
 	}
 
 	return receiver

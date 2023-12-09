@@ -214,7 +214,6 @@ func launchCommand(commandName string, commandParams, tmp []string, daemon bool)
 
 // main 程序入口
 func main() {
-
 	// params explain:
 	// t=command 执行命令行
 	// t='web-service' 启动web服务 可选项-port=8080 端口号、-daemon=false 守护进程

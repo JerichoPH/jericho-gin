@@ -18,12 +18,12 @@ import (
 // MySqlModel 基础模型
 type MySqlModel struct {
 	Id                       uint64         `gorm:"primaryKey;autoIncrement;type:bigint unsigned auto_increment;" json:"id"`
-	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"createdAt,omitempty"`
-	UpdatedAt                time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;comment:更新时间;" json:"updatedAt,omitempty"`
-	DeletedAt                gorm.DeletedAt `gorm:"index;type:datetime" json:"deletedAt"`
+	CreatedAt                time.Time      `gorm:"<-:create;type:datetime;default:CURRENT_TIMESTAMP;comment:创建时间;" json:"created_at"`
+	UpdatedAt                time.Time      `gorm:"type:datetime;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;comment:更新时间;" json:"updated_at"`
+	DeletedAt                gorm.DeletedAt `gorm:"index;type:datetime" json:"deleted_at"`
 	Uuid                     string         `gorm:"unique;type:varchar(36);not null;comment:uuid;" json:"uuid"`
 	Sort                     int64          `gorm:"type:bigint;default:0;comment:排序;" json:"sort"`
-	BeEnable                 bool           `gorm:"type:boolean;not null;default:0;comment:是否禁用;" json:"beEnable"`
+	BeEnable                 bool           `gorm:"type:boolean;not null;default:0;comment:是否禁用;" json:"be_enable"`
 	ctx                      *gin.Context
 	preloads                 []string
 	selects                  []string

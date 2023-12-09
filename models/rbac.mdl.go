@@ -285,6 +285,7 @@ func (PivotRbacRoleRbacMenuModel) TableName() string {
 // BindRbacRoles 绑定角色与菜单
 func (PivotRbacRoleRbacMenuModel) BindRbacRoles(rbacMenu *RbacMenuModel, rbacRoles []*RbacRoleModel) {
 	var pivotRbacRoleRbacMenus = make([]*PivotRbacRoleRbacMenuModel, 0)
+
 	database.NewGormLauncher().GetConn("").Table("pivot_rbac_roles__rbac_menus").Where("rbac_menu_uuid = ?", rbacMenu.Uuid).Delete(nil)
 
 	if len(rbacRoles) > 0 {
