@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"jericho-gin/models"
-	"jericho-gin/services"
 	"jericho-gin/tools"
 	"jericho-gin/wrongs"
 
 	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
@@ -69,6 +69,9 @@ func (receiver AccountStoreForm) ShouldBind(ctx *gin.Context) AccountStoreForm {
 
 // ShouldBind 编辑用户表单绑定
 func (receiver AccountUpdateForm) ShouldBind(ctx *gin.Context) AccountUpdateForm {
+	if ctx.Param("uuid") == "" {
+		wrongs.ThrowValidate("用户编号不能为空")
+	}
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -87,6 +90,11 @@ func (receiver AccountUpdateForm) ShouldBind(ctx *gin.Context) AccountUpdateForm
 
 // ShouldBind 修改用户密码表单绑定
 func (receiver AccountUpdatePasswordForm) ShouldBind(ctx *gin.Context) AccountUpdatePasswordForm {
+	if ctx.Param("uuid") == "" {
+		wrongs.ThrowValidate("用户编号不能为空")
+	}
+	std := tools.NewStdoutHelper("ok")
+	std.EchoLineDebug(ctx.Request.Method)
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -120,7 +128,13 @@ func (AccountController) Store(ctx *gin.Context) {
 	wrongs.ThrowWhenRepeat(ret, "昵称被占用")
 
 	// 新建
-	account := &models.AccountModel{}
+	account := &models.AccountModel{
+		MySqlModel: models.MySqlModel{Uuid: uuid.NewV4().String()},
+		Username:   form.Username,
+		Nickname:   form.Nickname,
+		Password:   tools.GeneratePassword(form.Password),
+		BeAdmin:    false,
+	}
 	if ret = models.
 		NewAccountModel().
 		GetDb("").
@@ -179,9 +193,14 @@ func (AccountController) Update(ctx *gin.Context) {
 	wrongs.ThrowWhenEmpty(ret, "用户")
 
 	// 编辑
+	account.Username = form.Username
+	account.Nickname = form.Nickname
 	if ret = models.NewAccountModel().GetDb("").Where("uuid = ?", ctx.Param("uuid")).Save(&account); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
+
+	// 用户绑定角色
+	models.AccountModel{}.BindRbacRoles(account, form.rbacRoles)
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Updated(map[string]any{"account": account}).ToGinResponse())
 }
@@ -198,10 +217,6 @@ func (AccountController) Detail(ctx *gin.Context) {
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"account": account}).ToGinResponse())
 }
 
-func (AccountController) listByQuery(ctx *gin.Context) *gorm.DB {
-	return services.NewAccountService(services.BaseService{Model: models.NewMySqlModel().SetModel(models.AccountModel{}), Ctx: ctx}).GetListByQuery()
-}
-
 // List 列表
 func (receiver AccountController) List(ctx *gin.Context) {
 	var accounts []models.AccountModel
@@ -209,7 +224,7 @@ func (receiver AccountController) List(ctx *gin.Context) {
 	ctx.JSON(
 		tools.NewCorrectWithGinContext("", ctx).
 			DataForPager(
-				receiver.listByQuery(ctx),
+				models.AccountModel{}.GetListByQuery(ctx),
 				func(db *gorm.DB) map[string]any {
 					db.Find(&accounts)
 					return map[string]any{"accounts": accounts}
@@ -225,11 +240,32 @@ func (receiver AccountController) ListJdt(ctx *gin.Context) {
 	ctx.JSON(
 		tools.NewCorrectWithGinContext("", ctx).
 			DataForJqueryDataTable(
-				receiver.listByQuery(ctx),
+				models.AccountModel{}.GetListByQuery(ctx),
 				func(db *gorm.DB) map[string]any {
 					db.Find(&accounts)
 					return map[string]any{"accounts": accounts}
 				},
 			).ToGinResponse(),
 	)
+}
+
+// PutUpdatePassword 修改密码
+func (recevier AccountController) PutUpdatePassword(ctx *gin.Context) {
+	var (
+		ret     *gorm.DB
+		account *models.AccountModel
+	)
+
+	form := AccountUpdatePasswordForm{}.ShouldBind(ctx)
+
+	ret = models.NewAccountModel().GetDb("").Where("uuid = ?", ctx.Param("uuid")).First(&account)
+	wrongs.ThrowWhenEmpty(ret, "用户")
+
+	// 验证密码
+	tools.CheckPassword(form.OldPassword, account.Password)
+
+	account.Password = tools.GeneratePassword(form.Password)
+	models.NewAccountModel().GetDb("").Where("uuid = ?", ctx.Param("uuid")).Save(&account)
+
+	ctx.JSON(tools.NewCorrectWithGinContext("修改成功", ctx).Blank().ToGinResponse())
 }

@@ -23,6 +23,7 @@ func (RbacRouter) Load(engine *gin.Engine) {
 		rbacRoleRouter := r.Group(
 			"role",
 			middlewares.CheckAuth(),
+			middlewares.CheckPermission(),
 		)
 		{
 			// 新建
@@ -43,6 +44,7 @@ func (RbacRouter) Load(engine *gin.Engine) {
 		rbacPermissionRouter := r.Group(
 			"permission",
 			middlewares.CheckAuth(),
+			middlewares.CheckPermission(),
 		)
 		{
 			// 新建

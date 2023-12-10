@@ -20,7 +20,7 @@ func (AccountRouter) Load(engine *gin.Engine) {
 	r := engine.Group(
 		"api/account",
 		middlewares.CheckAuth(),
-		// middlewares.CheckPermission(),
+		middlewares.CheckPermission(),
 	)
 	{
 		// 新建
@@ -40,5 +40,8 @@ func (AccountRouter) Load(engine *gin.Engine) {
 
 		// jquery-dataTable分页列表
 		r.GET(".jdt", controllers.NewAccountController().ListJdt)
+
+		// 修改密码
+		r.PUT(":uuid/password", controllers.NewAccountController().PutUpdatePassword)
 	}
 }

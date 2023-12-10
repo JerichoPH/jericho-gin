@@ -54,6 +54,7 @@ func (receiver AccountModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 			"nickname": "a.nickname like ?",
 		}).
 		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
+		SetWheresExtraHasValue(map[string]func(string, *gorm.DB) *gorm.DB{}).
 		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{}).
 		SetCtx(ctx).
 		GetDbUseQuery("").

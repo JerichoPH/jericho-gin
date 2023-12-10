@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -85,14 +84,11 @@ func (AuthController) PostRegister(ctx *gin.Context) {
 	ret = models.NewAccountModel().GetDb("").Where("nickname", form.Nickname).First(&repeat)
 	wrongs.ThrowWhenRepeat(ret, "昵称")
 
-	// 密码加密
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(form.Password), 14)
-
 	// 保存新用户
 	account := &models.AccountModel{
 		MySqlModel: models.MySqlModel{Uuid: uuid.NewV4().String()},
 		Username:   form.Username,
-		Password:   string(bytes),
+		Password:   tools.GeneratePassword(form.Password),
 		Nickname:   form.Nickname,
 	}
 	if ret = models.NewAccountModel().GetDb("").Create(&account); ret.Error != nil {
@@ -117,7 +113,7 @@ func (AuthController) PostLogin(ctx *gin.Context) {
 	wrongs.ThrowWhenEmpty(ret, "用户")
 
 	// 验证密码
-	if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(form.Password)); err != nil {
+	if !tools.CheckPassword(form.Password, account.Password) {
 		wrongs.ThrowUnAuth("账号或密码错误")
 	}
 

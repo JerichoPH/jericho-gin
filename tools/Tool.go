@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // GetAuth 获取登陆信息
@@ -25,6 +26,20 @@ func GetAuth(ctx *gin.Context) any {
 	}
 
 	return authorization
+}
+
+// 生成密码
+func GeneratePassword(password string) string {
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes)
+}
+
+// 验证密码
+func CheckPassword(password, target string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(target), []byte(password)); err != nil {
+		return false
+	}
+	return true
 }
 
 func GetRootPath() string {

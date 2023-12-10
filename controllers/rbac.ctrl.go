@@ -52,6 +52,9 @@ type (
 func (receiver RbacRoleStoreForm) ShouldBind(ctx *gin.Context) RbacRoleStoreForm {
 	var err error
 
+	if ctx.Request.Method == "PUT" && ctx.Param("uuid") == "" {
+		wrongs.ThrowValidate("角色编号不能为空")
+	}
 	if err = ctx.ShouldBind(&receiver); err != nil {
 		if len(receiver.Name) == 0 {
 			wrongs.ThrowValidate("角色名称不能为空")
@@ -63,7 +66,9 @@ func (receiver RbacRoleStoreForm) ShouldBind(ctx *gin.Context) RbacRoleStoreForm
 
 // ShouldBind 权限表单绑定
 func (receiver RbacPermissionStoreForm) ShouldBind(ctx *gin.Context) RbacPermissionStoreForm {
-
+	if ctx.Request.Method == "PUT" && ctx.Param("uuid") == "" {
+		wrongs.ThrowValidate("权限编号不能为空")
+	}
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -84,6 +89,9 @@ func (receiver RbacPermissionStoreForm) ShouldBind(ctx *gin.Context) RbacPermiss
 func (receiver RbacMenuStoreForm) ShouldBind(ctx *gin.Context) RbacMenuStoreForm {
 	var ret *gorm.DB
 
+	if ctx.Request.Method == "PUT" && ctx.Param("uuid") == "" {
+		wrongs.ThrowValidate("菜单编号不能为空")
+	}
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
