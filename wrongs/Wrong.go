@@ -3,8 +3,9 @@ package wrongs
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"strconv"
+
+	"gorm.io/gorm"
 )
 
 type Wrong struct{ ErrorMessage string }
@@ -94,12 +95,12 @@ func ThrowWhenIsNotUint(strValue string, errorMessage string) (uintValue uint) {
 	return
 }
 
-// ThrowWhenIsEmpty 当数据库返回空则报错
+// ThrowWhenEmpty 当数据库返回空则报错
 //
 //	@param db
 //	@param name
 //	@return bool
-func ThrowWhenIsEmpty(db *gorm.DB, errorField string) bool {
+func ThrowWhenEmpty(db *gorm.DB, errorField string) bool {
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
 			if errorField != "" {
@@ -113,12 +114,12 @@ func ThrowWhenIsEmpty(db *gorm.DB, errorField string) bool {
 	return false
 }
 
-// ThrowWhenIsRepeat 当数据库返回不空则报错
+// ThrowWhenRepeat 当数据库返回不空则报错
 //
 //	@param db
 //	@param name
 //	@return bool
-func ThrowWhenIsRepeat(db *gorm.DB, errorField string) bool {
+func ThrowWhenRepeat(db *gorm.DB, errorField string) bool {
 	if db.Error == nil {
 		if errorField != "" {
 			ThrowForbidden(errorField + "重复")

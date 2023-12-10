@@ -79,7 +79,7 @@ func (receiver *MySqlModel) demoFindOne() {
 		SetNotWheres(map[string]any{}).
 		GetDb("").
 		First(b)
-	wrongs.ThrowWhenIsEmpty(ret, "XX")
+	wrongs.ThrowWhenEmpty(ret, "XX")
 }
 
 // demoFind 获取多条数据演示

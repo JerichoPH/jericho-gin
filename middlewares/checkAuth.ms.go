@@ -51,12 +51,12 @@ func CheckAuth() gin.HandlerFunc {
 
 				// 获取用户信息
 				ret = models.NewMySqlModel().SetModel(models.AccountModel{}).GetDb("").Where("uuid", claims.Uuid).First(&account)
-				if wrongs.ThrowWhenIsEmpty(ret, "") {
+				if wrongs.ThrowWhenEmpty(ret, "") {
 					wrongs.ThrowUnLogin(fmt.Sprintf("令牌指向用户(JWT) %s %v ", token, claims))
 				}
 			case "AU":
 				ret = models.NewMySqlModel().SetModel(models.AccountModel{}).SetWheres(map[string]any{"uuid": token}).GetDb("").First(&account)
-				if wrongs.ThrowWhenIsEmpty(ret, "") {
+				if wrongs.ThrowWhenEmpty(ret, "") {
 					wrongs.ThrowUnLogin(fmt.Sprintf("令牌指向用户(AU) %s", token))
 				}
 			default:

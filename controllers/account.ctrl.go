@@ -13,8 +13,29 @@ import (
 type (
 	// AccountController 用户控制器
 	AccountController struct{}
-	// AccountStoreForm 用户表单
-	AccountStoreForm struct{}
+	// AccountStoreForm 新建用户表单
+	AccountStoreForm struct {
+		Username             string   `json:"username"`
+		Nickname             string   `json:"nickname"`
+		Password             string   `json:"password"`
+		PasswordConfirmation string   `json:"password_confirmation"`
+		RbacRoleUuids        []string `json:"rbac_role_uuids"`
+		rbacRoles            []*models.RbacRoleModel
+	}
+	// AccountUpdateForm 编辑用户表单
+	AccountUpdateForm struct {
+		Username      string   `json:"username"`
+		Nickname      string   `json:"nickname"`
+		RbacRoleUuids []string `json:"rbac_role_uuids"`
+		rbacRoles     []*models.RbacRoleModel
+	}
+
+	// AccountUpdatePasswordForm 修改密码表单
+	AccountUpdatePasswordForm struct {
+		OldPassword          string `json:"old_password"`
+		Password             string `json:"password"`
+		PasswordConfirmation string `json:"password_confirmation"`
+	}
 )
 
 // NewAccountController 构造函数
@@ -22,10 +43,61 @@ func NewAccountController() *AccountController {
 	return &AccountController{}
 }
 
-// ShouldBind 表单绑定
+// ShouldBind 新建用户表单绑定
 func (receiver AccountStoreForm) ShouldBind(ctx *gin.Context) AccountStoreForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
+	}
+	if len(receiver.Username) < 2 {
+		wrongs.ThrowValidate("账号不能小于2位")
+	}
+	if len(receiver.Nickname) < 2 {
+		wrongs.ThrowValidate("昵称不能小于2位")
+	}
+	if len(receiver.Password) < 6 {
+		wrongs.ThrowValidate("密码不能小于6位")
+	}
+	if receiver.Password != receiver.PasswordConfirmation {
+		wrongs.ThrowValidate("两次密码不一致")
+	}
+	if len(receiver.RbacRoleUuids) > 0 {
+		models.NewRbacRoleModel().GetDb("").Where("uuid in ?", receiver.RbacRoleUuids).Find(&receiver.rbacRoles)
+	}
+
+	return receiver
+}
+
+// ShouldBind 编辑用户表单绑定
+func (receiver AccountUpdateForm) ShouldBind(ctx *gin.Context) AccountUpdateForm {
+	if err := ctx.ShouldBind(&receiver); err != nil {
+		wrongs.ThrowValidate(err.Error())
+	}
+	if len(receiver.Username) < 2 {
+		wrongs.ThrowValidate("账号不能小于2位")
+	}
+	if len(receiver.Nickname) < 2 {
+		wrongs.ThrowValidate("昵称不能小于2位")
+	}
+	if len(receiver.RbacRoleUuids) > 0 {
+		models.NewRbacRoleModel().GetDb("").Where("uuid in ?", receiver.RbacRoleUuids).Find(&receiver.rbacRoles)
+	}
+
+	return receiver
+}
+
+// ShouldBind 修改用户密码表单绑定
+func (receiver AccountUpdatePasswordForm) ShouldBind(ctx *gin.Context) AccountUpdatePasswordForm {
+	if err := ctx.ShouldBind(&receiver); err != nil {
+		wrongs.ThrowValidate(err.Error())
+	}
+	if len(receiver.OldPassword) < 6 {
+		wrongs.ThrowValidate("原密码不能小于6位")
+	}
+	if len(receiver.Password) < 6 {
+		wrongs.ThrowValidate("新密码不能小于6位")
+	}
+	if receiver.Password != receiver.PasswordConfirmation {
+		wrongs.ThrowValidate("两次密码不一致")
 	}
 
 	return receiver
@@ -34,17 +106,30 @@ func (receiver AccountStoreForm) ShouldBind(ctx *gin.Context) AccountStoreForm {
 // Store 新建
 func (AccountController) Store(ctx *gin.Context) {
 	var (
-		ret *gorm.DB
-		// repeat models.AccountModel
+		ret    *gorm.DB
+		repeat *models.AccountModel
 	)
+
+	// 表单绑定
+	form := AccountStoreForm{}.ShouldBind(ctx)
+
+	// 查重
+	ret = models.NewAccountModel().GetDb("").Where("username = ?", form.Username).First(&repeat)
+	wrongs.ThrowWhenRepeat(ret, "账号被占用")
+	ret = models.NewAccountModel().GetDb("").Where("nickname = ?", form.Nickname).First(&repeat)
+	wrongs.ThrowWhenRepeat(ret, "昵称被占用")
 
 	// 新建
 	account := &models.AccountModel{}
-	if ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
+	if ret = models.
+		NewAccountModel().
 		GetDb("").
 		Create(&account); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
+
+	// 用户绑定角色
+	models.AccountModel{}.BindRbacRoles(account, form.rbacRoles)
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Created(map[string]any{"account": account}).ToGinResponse())
 }
@@ -57,14 +142,15 @@ func (AccountController) Delete(ctx *gin.Context) {
 	)
 
 	// 查询
-	ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
-		SetWheres(map[string]any{"uuid": ctx.Param("uuid")}).
+	ret = models.
+		NewAccountModel().
 		GetDb("").
+		Where("uuid = ?", ctx.Param("uuid")).
 		First(&account)
-	wrongs.ThrowWhenIsEmpty(ret, "用户")
+	wrongs.ThrowWhenEmpty(ret, "用户")
 
 	// 删除
-	if ret := models.NewMySqlModel().SetModel(models.AccountModel{}).GetDb("").Delete(&account); ret.Error != nil {
+	if ret := models.NewAccountModel().GetDb("").Where("uuid = ?", account.Uuid).Delete(&account); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
 
@@ -75,25 +161,25 @@ func (AccountController) Delete(ctx *gin.Context) {
 func (AccountController) Update(ctx *gin.Context) {
 	var (
 		ret     *gorm.DB
-		account models.AccountModel
-		// repeat  models.AccountModel
+		account *models.AccountModel
+		// repeat  *models.AccountModel
 	)
 
 	// 表单
-	// form := new(accountStoreForm).ShouldBind(ctx)
+	form := new(AccountUpdateForm).ShouldBind(ctx)
+
+	// 查重
+	ret = models.NewAccountModel().GetDb("").Where("username = ?", form.Username).Where("uuid <> ?", ctx.Param("uuid")).First(nil)
+	wrongs.ThrowWhenRepeat(ret, "账号被占用")
+	ret = models.NewAccountModel().GetDb("").Where("nickname = ?", form.Nickname).Where("uuid <> ?", ctx.Param("uuid")).First(nil)
+	wrongs.ThrowWhenRepeat(ret, "昵称被占用")
 
 	// 查询
-	ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
-		SetWheres(map[string]any{"uuid": ctx.Param("uuid")}).
-		GetDb("").
-		First(&account)
-	wrongs.ThrowWhenIsEmpty(ret, "用户")
+	ret = models.NewAccountModel().GetDb("").Where("uuid", ctx.Param("uuid")).First(&account)
+	wrongs.ThrowWhenEmpty(ret, "用户")
 
 	// 编辑
-	if ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
-		GetDb("").
-		Where("uuid = ?", ctx.Param("uuid")).
-		Save(&account); ret.Error != nil {
+	if ret = models.NewAccountModel().GetDb("").Where("uuid = ?", ctx.Param("uuid")).Save(&account); ret.Error != nil {
 		wrongs.ThrowForbidden(ret.Error.Error())
 	}
 
@@ -106,11 +192,8 @@ func (AccountController) Detail(ctx *gin.Context) {
 		ret     *gorm.DB
 		account models.AccountModel
 	)
-	ret = models.NewMySqlModel().SetModel(models.AccountModel{}).
-		SetWheres(map[string]any{"uuid": ctx.Param("uuid")}).
-		GetDb("").
-		First(&account)
-	wrongs.ThrowWhenIsEmpty(ret, "用户")
+	ret = models.NewAccountModel().SetCtx(ctx).GetDbUseQuery("").Where("uuid", ctx.Param("uuid")).First(&account)
+	wrongs.ThrowWhenEmpty(ret, "用户")
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"account": account}).ToGinResponse())
 }

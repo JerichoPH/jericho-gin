@@ -3,6 +3,9 @@ package models
 import (
 	"jericho-gin/database"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type (
@@ -40,4 +43,35 @@ func (receiver AccountModel) GetPermissionUuids() (rbacPermissionUuids []string)
 		Pluck("uuid", &rbacPermissionUuids)
 
 	return
+}
+
+// GetListByQuery 通过Query获取列表
+func (receiver AccountModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
+	return NewAccountModel().
+		SetWheresEqual("open_id", "work_area_unique_code", "rank").
+		SetWheresFuzzy(map[string]string{
+			"account":  "a.account like ?",
+			"nickname": "a.nickname like ?",
+		}).
+		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
+		SetWheresExtraHasValues(map[string]func([]string, *gorm.DB) *gorm.DB{}).
+		SetCtx(ctx).
+		GetDbUseQuery("").
+		Table("accounts as a")
+}
+
+// BindRbacRoles 用户绑定角色
+func (receiver AccountModel) BindRbacRoles(account *AccountModel, rbacRoles []*RbacRoleModel) {
+	var pivotRbacRoleAccounts []*PivotRbacRoleAccountModel
+	database.NewGormLauncher().GetConn("").Table("pivot_rbac_roles__accounts").Where("account_uuid = ?", account.Uuid).Delete(nil)
+
+	if len(rbacRoles) > 0 {
+		for _, rbacRole := range rbacRoles {
+			pivotRbacRoleAccounts = append(pivotRbacRoleAccounts, &PivotRbacRoleAccountModel{
+				AccountUuid:  account.Uuid,
+				RbacRoleUuid: rbacRole.Uuid,
+			})
+		}
+		NewPivotRbacRoleAccountModel().GetDb("").Create(&pivotRbacRoleAccounts)
+	}
 }

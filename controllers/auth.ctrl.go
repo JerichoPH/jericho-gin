@@ -81,9 +81,9 @@ func (AuthController) PostRegister(ctx *gin.Context) {
 	var repeat models.AccountModel
 	var ret *gorm.DB
 	ret = models.NewAccountModel().GetDb("").Where("username", form.Username).First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "用户名")
+	wrongs.ThrowWhenRepeat(ret, "用户名")
 	ret = models.NewAccountModel().GetDb("").Where("nickname", form.Nickname).First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "昵称")
+	wrongs.ThrowWhenRepeat(ret, "昵称")
 
 	// 密码加密
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(form.Password), 14)
@@ -114,7 +114,7 @@ func (AuthController) PostLogin(ctx *gin.Context) {
 
 	// 获取用户
 	ret = models.NewAccountModel().GetDb("").Where("username", form.Username).First(&account)
-	wrongs.ThrowWhenIsEmpty(ret, "用户")
+	wrongs.ThrowWhenEmpty(ret, "用户")
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(form.Password)); err != nil {

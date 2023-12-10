@@ -92,7 +92,7 @@ func (receiver RbacMenuStoreForm) ShouldBind(ctx *gin.Context) RbacMenuStoreForm
 	}
 	if receiver.ParentUuid != "" {
 		ret = models.NewRbacMenuModel().GetDb("").Where("uuid = ?", receiver.ParentUuid).First(&receiver.parentMenu)
-		wrongs.ThrowWhenIsEmpty(ret, fmt.Sprintf("父级菜单（%s）", receiver.ParentUuid))
+		wrongs.ThrowWhenEmpty(ret, fmt.Sprintf("父级菜单（%s）", receiver.ParentUuid))
 	}
 	if len(receiver.RbacRoleUuids) > 0 {
 		models.NewRbacRoleModel().GetDb("").Where("uuid in ?", receiver.RbacRoleUuids).Find(&receiver.rbacRoles)
@@ -121,7 +121,7 @@ func (RbacRoleController) Store(ctx *gin.Context) {
 		GetDb("").
 		Where("name = ?", form.Name).
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "角色名称")
+	wrongs.ThrowWhenRepeat(ret, "角色名称")
 
 	// 新建
 	rbacRole := &models.RbacRoleModel{
@@ -149,7 +149,7 @@ func (RbacRoleController) Delete(ctx *gin.Context) {
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacRole)
-	wrongs.ThrowWhenIsEmpty(ret, "角色")
+	wrongs.ThrowWhenEmpty(ret, "角色")
 
 	// 删除
 	if ret := models.NewRbacRoleModel().
@@ -177,14 +177,14 @@ func (RbacRoleController) Update(ctx *gin.Context) {
 		GetDb("").
 		Where("name = ? and uuid <> ?", form.Name, ctx.Param("uuid")).
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "角色名称")
+	wrongs.ThrowWhenRepeat(ret, "角色名称")
 
 	// 查询
 	ret = models.NewRbacRoleModel().
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacRole)
-	wrongs.ThrowWhenIsEmpty(ret, "角色")
+	wrongs.ThrowWhenEmpty(ret, "角色")
 
 	// 编辑
 	rbacRole.Name = form.Name
@@ -209,7 +209,7 @@ func (RbacRoleController) Detail(ctx *gin.Context) {
 		GetDbUseQuery("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacRole)
-	wrongs.ThrowWhenIsEmpty(ret, "角色")
+	wrongs.ThrowWhenEmpty(ret, "角色")
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbac_role": rbacRole}).ToGinResponse())
 }
@@ -268,7 +268,7 @@ func (RbacPermissionController) Store(ctx *gin.Context) {
 		GetDb("").
 		Where("name = ?", form.Name).
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "权限名称")
+	wrongs.ThrowWhenRepeat(ret, "权限名称")
 
 	// 新建
 	rbacPermission := &models.RbacPermissionModel{
@@ -301,7 +301,7 @@ func (RbacPermissionController) Delete(ctx *gin.Context) {
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacPermission)
-	wrongs.ThrowWhenIsEmpty(ret, "权限")
+	wrongs.ThrowWhenEmpty(ret, "权限")
 
 	// 删除
 	if ret := models.NewRbacPermissionModel().
@@ -329,14 +329,14 @@ func (RbacPermissionController) Update(ctx *gin.Context) {
 		GetDb("").
 		Where("name = ? and uuid <> ?", form.Name, ctx.Param("uuid")).
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, fmt.Sprintf("权限名称 %s %s", ctx.Param("uuid"), repeat.Uuid))
+	wrongs.ThrowWhenRepeat(ret, fmt.Sprintf("权限名称 %s %s", ctx.Param("uuid"), repeat.Uuid))
 
 	// 查询
 	ret = models.NewRbacPermissionModel().
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacPermission)
-	wrongs.ThrowWhenIsEmpty(ret, "权限")
+	wrongs.ThrowWhenEmpty(ret, "权限")
 
 	// 编辑
 	rbacPermission.Name = form.Name
@@ -366,7 +366,7 @@ func (RbacPermissionController) Detail(ctx *gin.Context) {
 		GetDbUseQuery("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacPermission)
-	wrongs.ThrowWhenIsEmpty(ret, "权限")
+	wrongs.ThrowWhenEmpty(ret, "权限")
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbac_permission": rbacPermission}).ToGinResponse())
 }
@@ -426,7 +426,7 @@ func (RbacMenuController) Store(ctx *gin.Context) {
 		Where("name = ?", form.Name).
 		Where("parent_uuid = ?", form.ParentUuid).
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "菜单名称")
+	wrongs.ThrowWhenRepeat(ret, "菜单名称")
 
 	// 新建
 	rbacMenu := &models.RbacMenuModel{
@@ -462,7 +462,7 @@ func (RbacMenuController) Delete(ctx *gin.Context) {
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacMenu)
-	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+	wrongs.ThrowWhenEmpty(ret, "菜单")
 	// 查询该菜单下是否存在子集
 	subs = rbacMenu.GetSubUuidsByParentUuid(rbacMenu.Uuid)
 	if len(subs) > 0 {
@@ -498,14 +498,14 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 		Where("uuid <> ?", ctx.Param("uuid")).
 		Where("parent_uuid <> ?", form.ParentUuid).Debug().
 		First(&repeat)
-	wrongs.ThrowWhenIsRepeat(ret, "菜单名称")
+	wrongs.ThrowWhenRepeat(ret, "菜单名称")
 
 	// 查询
 	ret = models.NewRbacMenuModel().
 		GetDb("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacMenu)
-	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+	wrongs.ThrowWhenEmpty(ret, "菜单")
 	if form.ParentUuid != "" {
 		if rbacMenu.ParentUuid == form.ParentUuid {
 			wrongs.ThrowValidate("父级菜单不能是自己")
@@ -549,7 +549,7 @@ func (RbacMenuController) Detail(ctx *gin.Context) {
 		GetDbUseQuery("").
 		Where("uuid = ?", ctx.Param("uuid")).
 		First(&rbacMenu)
-	wrongs.ThrowWhenIsEmpty(ret, "菜单")
+	wrongs.ThrowWhenEmpty(ret, "菜单")
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbac_menu": rbacMenu}).ToGinResponse())
 }

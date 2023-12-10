@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"jericho-gin/models"
 	"jericho-gin/tools"
 	"jericho-gin/wrongs"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CheckPermission() gin.HandlerFunc {
@@ -28,7 +29,7 @@ func CheckPermission() gin.HandlerFunc {
 
 			// 查询当前路由是否存在权限
 			ret = models.NewRbacPermissionModel().GetDb("").Where("uri", currentUri).First(&currentRbacPermission)
-			wrongs.ThrowWhenIsEmpty(ret, "当前路由对应权限")
+			wrongs.ThrowWhenEmpty(ret, "当前路由对应权限")
 
 			// 检查当前路由是否合法
 			for _, uuid := range rbacPermissionUuids {
@@ -42,7 +43,7 @@ func CheckPermission() gin.HandlerFunc {
 				wrongs.ThrowUnAuth("权限不足")
 			}
 		}
-		
+
 		ctx.Next()
 	}
 }
