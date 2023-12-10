@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"jericho-gin/database"
-	"jericho-gin/types"
 	"jericho-gin/wrongs"
 )
 
@@ -29,9 +28,10 @@ type (
 	RbacMenuModel struct {
 		MySqlModel
 		Name        string           `gorm:"type:varchar(64);not null;comment:菜单名称" json:"name"`
-		SubTitle    string           `gorm:"type:varchar(255);not null;default:'';comment:菜单副标题" json:"sub_title"`
+		SubTitle    string           `gorm:"type:varchar(128);not null;default:'';comment:菜单副标题" json:"sub_title"`
 		Description *string          `gorm:"type:text;comment:菜单描述" json:"description"`
-		Uri         string           `gorm:"type:varchar(255);not null;default:'';comment:菜单所属路由" json:"uri"`
+		Uri         string           `gorm:"type:varchar(128);not null;default:'';comment:菜单所属路由" json:"uri"`
+		Icon        string           `gorm:"type:varchar(64);not null;default:'';comment:菜单图标" json:"icon"`
 		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
 		ParentUuid  string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parent_uuid"`
 		Parent      *RbacMenuModel   `gorm:"foreignKey:parent_uuid;references:uuid;comment:所属父级;" json:"parent"`
@@ -67,6 +67,8 @@ func (RbacRoleModel) TableName() string {
 // GetListByQuery 根据Query获取角色列表
 func (receiver RbacRoleModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 	return NewRbacRoleModel().
+		SetWheresEqual("be_enable").
+		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
 		SetWheresExtraHasValue(map[string]func(string, *gorm.DB) *gorm.DB{
 			"name": func(value string, db *gorm.DB) *gorm.DB {
 				return db.Where(fmt.Sprintf("name like '%%%s%%'", value))
@@ -95,6 +97,8 @@ func (RbacPermissionModel) TableName() string {
 // GetListByQuery 根据Query获取权限列表
 func (receiver RbacPermissionModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 	return NewRbacPermissionModel().
+		SetWheresEqual("be_enable").
+		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
 		SetWheresExtraHasValue(map[string]func(string, *gorm.DB) *gorm.DB{
 			"name": func(value string, db *gorm.DB) *gorm.DB {
 				return db.Where(fmt.Sprintf("rp.name like '%%%s%%'", value))
@@ -148,16 +152,9 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 	}
 
 	return NewRbacMenuModel().
+		SetWheresEqual("be_enable").
+		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
 		SetWheresExtraHasValue(map[string]func(string, *gorm.DB) *gorm.DB{
-			"be_enable": func(value string, db *gorm.DB) *gorm.DB {
-				if types.IsTrue(value) {
-					db.Where("be_enable", true)
-				}
-				if types.IsFalse(value) {
-					db.Where("be_enable", false)
-				}
-				return db
-			},
 			"name": func(value string, db *gorm.DB) *gorm.DB {
 				return db.Where(fmt.Sprintf("name like '%%%s%%'", value))
 			},
@@ -179,9 +176,8 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 				return db.Where("uri in (?)", values)
 			},
 		}).
-		SetWheresDateBetween("created_at", "updated_at", "deleted_at").
 		SetCtx(ctx).
-		GetDbUseQuery("").Debug().
+		GetDbUseQuery("").
 		Table("rbac_menus as rm")
 }
 

@@ -17,8 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetAuthorization 获取登陆信息
-func GetAuthorization(ctx *gin.Context) any {
+// GetAuth 获取登陆信息
+func GetAuth(ctx *gin.Context) any {
 	authorization, exist := ctx.Get(string(types.ACCOUNT_AUTH))
 	if !exist {
 		wrongs.ThrowUnLogin("登陆失效")

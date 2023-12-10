@@ -62,6 +62,7 @@ func (RbacRouter) Load(engine *gin.Engine) {
 		rbacMenuRouter := r.Group(
 			"menu",
 			middlewares.CheckAuth(),
+			middlewares.CheckPermission(),
 		)
 		{
 			// 新建
