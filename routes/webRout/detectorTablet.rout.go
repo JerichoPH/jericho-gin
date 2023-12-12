@@ -1,13 +1,14 @@
-package webRoute
+package webRout
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type DetectorTabletRouter struct{}
+type DetectorTabletRout struct{}
 
-func (DetectorTabletRouter) Load(engine *gin.Engine) {
+func (DetectorTabletRout) Load(engine *gin.Engine) {
 	engine.LoadHTMLGlob("templates/DetectorTablet/index.html")
 	//engine.Static("/detectorTablet", "templates/DetectorTablet")
 	engine.StaticFS("/detectorTablet", http.Dir("templates/DetectorTablet"))

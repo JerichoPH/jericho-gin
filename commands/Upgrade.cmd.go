@@ -10,15 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// UpgradeCommand 程序升级
-type UpgradeCommand struct{}
+// UpgradeCmd 程序升级
+type UpgradeCmd struct{}
 
-// NewUpgradeCommand 构造函数
-func NewUpgradeCommand() UpgradeCommand {
-	return UpgradeCommand{}
+// NewUpgradeCmd 构造函数
+func NewUpgradeCmd() UpgradeCmd {
+	return UpgradeCmd{}
 }
 
-func (UpgradeCommand) init() []string {
+// 初始化项目
+func (UpgradeCmd) init() []string {
 	var (
 		rbacPermissions = make([]*models.RbacPermissionModel, 0)
 		rbacMenus       = make([]*models.RbacMenuModel, 0)
@@ -89,7 +90,7 @@ func (UpgradeCommand) init() []string {
 }
 
 // Do 执行命令
-func (receiver UpgradeCommand) Do(params []string) []string {
+func (receiver UpgradeCmd) Do(params []string) []string {
 	switch params[0] {
 	case "init":
 		return receiver.init()

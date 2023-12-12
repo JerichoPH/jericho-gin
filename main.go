@@ -15,8 +15,8 @@ import (
 	"jericho-gin/database"
 	"jericho-gin/middlewares"
 	"jericho-gin/providers"
-	"jericho-gin/routes/apiRoute"
-	"jericho-gin/routes/webRoute"
+	"jericho-gin/routes/apiRout"
+	"jericho-gin/routes/webRout"
 	"jericho-gin/settings"
 	"jericho-gin/tools"
 	"jericho-gin/types"
@@ -188,8 +188,8 @@ func launchCommand(commandName string, commandParams, tmp []string, daemon bool)
 		engine.Use(middlewares.Cors())                              // 允许跨域
 		engine.Use(middlewares.TimeoutMiddleware(time.Second * 60)) // 超时处理
 		engine.Use(wrongs.RecoverHandler)                           // 异常处理
-		webRoute.RouterHandle{}.Register(engine)                    // 加载web路由
-		apiRoute.RouterHandle{}.Register(engine)                    // 加载api路由
+		webRout.RoutHandle{}.Register(engine)                       // 加载web路由
+		apiRout.RoutHandle{}.Register(engine)                       // 加载api路由
 
 		// 绑定web-socket路由
 		engine.GET("/ws", func(ctx *gin.Context) {
@@ -203,9 +203,9 @@ func launchCommand(commandName string, commandParams, tmp []string, daemon bool)
 
 		log.Printf("[app] [程序停止] [%s]", time.Now().Format(string(types.TIME_FORMAT_DATETIME)))
 	case "test":
-		commandResults = commands.NewTestCommand().Handle(commandParams)
+		commandResults = commands.NewTestCmd().Handle(commandParams)
 	case "upgrade":
-		commandResults = commands.NewUpgradeCommand().Do(commandParams)
+		commandResults = commands.NewUpgradeCmd().Do(commandParams)
 	}
 
 	fmt.Println(tools.StdoutDebug(fmt.Sprintf("『执行完成 %s』 「%s」 ", tools.NewTime().SetTimeNowAdd8Hour().ToDateTimeString(), strings.Join(tmp, " ")), "").GetContentAndNext(strings.Join(commandResults, " ")))

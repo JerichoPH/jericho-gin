@@ -9,9 +9,9 @@ import (
 )
 
 type (
-	// WebsocketController websocket控制器
-	WebsocketController struct{}
-	webSocketStoreForm  struct {
+	// WebsocketCtrl websocket控制器
+	WebsocketCtrl      struct{}
+	webSocketStoreForm struct {
 		ReceiverUuid string `json:"receiver_uuid"`
 		Message      any    `json:"message"`
 	}
@@ -33,13 +33,13 @@ func (receiver webSocketStoreForm) ShouldBind(ctx *gin.Context) webSocketStoreFo
 	return receiver
 }
 
-// NewWebsocketController 初始化websocket控制
-func NewWebsocketController() *WebsocketController {
-	return &WebsocketController{}
+// NewWebsocketCtrl 初始化websocket控制
+func NewWebsocketCtrl() *WebsocketCtrl {
+	return &WebsocketCtrl{}
 }
 
 // SendTo 发送消息
-func (receiver WebsocketController) SendTo(ctx *gin.Context) {
+func (receiver WebsocketCtrl) SendTo(ctx *gin.Context) {
 	form := (&webSocketStoreForm{}).ShouldBind(ctx)
 
 	// 发送到websocket客户端

@@ -1,4 +1,4 @@
-package webRoute
+package webRout
 
 import (
 	"net/http"
@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type WsTestRouter struct{}
+type WsTestRout struct{}
 
-func (WsTestRouter) Load(engine *gin.Engine) {
+func (WsTestRout) Load(engine *gin.Engine) {
 
 	r := engine.Group("test")
 	{

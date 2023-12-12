@@ -11,15 +11,15 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// TestCommand 测试用
-type TestCommand struct{}
+// TestCmd 测试用
+type TestCmd struct{}
 
-// NewTestCommand 构造函数
-func NewTestCommand() *TestCommand {
-	return &TestCommand{}
+// NewTestCmd 构造函数
+func NewTestCmd() *TestCmd {
+	return &TestCmd{}
 }
 
-func (receiver TestCommand) uuid() []string {
+func (receiver TestCmd) uuid() []string {
 	c := make(chan string)
 	go func(c chan string) {
 		uuidStr := uuid.NewV4().String()
@@ -29,12 +29,12 @@ func (receiver TestCommand) uuid() []string {
 	return []string{<-c}
 }
 
-func (receiver TestCommand) ls() []string {
+func (receiver TestCmd) ls() []string {
 	_, res := (&tools.Cmd{}).Process("ls", "-la")
 	return []string{res}
 }
 
-func (receiver TestCommand) redis() []string {
+func (receiver TestCmd) redis() []string {
 	if _, err := database.NewRedis(0).SetValue("test", "AAA", 15*time.Minute); err != nil {
 		wrongs.ThrowForbidden(err.Error())
 	}
@@ -50,7 +50,7 @@ func (receiver TestCommand) redis() []string {
 	return []string{""}
 }
 
-func (receiver TestCommand) t() []string {
+func (receiver TestCmd) t() []string {
 	var (
 		// 电务段器材
 		equipmentUniqueCodes = make([]string, 0)
@@ -186,7 +186,7 @@ type (
 )
 
 // Handle 执行命令
-func (receiver TestCommand) Handle(params []string) []string {
+func (receiver TestCmd) Handle(params []string) []string {
 	switch params[0] {
 	case "uuid":
 		return receiver.uuid()

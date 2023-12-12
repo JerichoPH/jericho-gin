@@ -1,4 +1,4 @@
-package webRoute
+package webRout
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type HomeRouter struct{}
+type HomeRout struct{}
 
-func (HomeRouter) Load(engine *gin.Engine) {
+func (HomeRout) Load(engine *gin.Engine) {
 	r := engine.Group("")
 	{
 		r.GET("", func(ctx *gin.Context) {

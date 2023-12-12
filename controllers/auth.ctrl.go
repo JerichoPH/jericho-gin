@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"jericho-gin/database"
 	"jericho-gin/models"
 	"jericho-gin/tools"
 	"jericho-gin/wrongs"
@@ -11,8 +12,8 @@ import (
 )
 
 type (
-	// AuthController 权鉴控制器
-	AuthController struct{}
+	// AuthCtrl 权鉴控制器
+	AuthCtrl struct{}
 	// authRegisterForm 注册表单
 	authRegisterForm struct {
 		Username             string `json:"username" binding:"required"`
@@ -27,9 +28,9 @@ type (
 	}
 )
 
-// NewAuthController 构造函数
-func NewAuthController() *AuthController {
-	return &AuthController{}
+// NewAuthCtrl 构造函数
+func NewAuthCtrl() *AuthCtrl {
+	return &AuthCtrl{}
 }
 
 // ShouldBind 绑定表单（注册）
@@ -72,7 +73,7 @@ func (receiver authLoginForm) ShouldBind(ctx *gin.Context) authLoginForm {
 }
 
 // PostRegister 注册
-func (AuthController) PostRegister(ctx *gin.Context) {
+func (AuthCtrl) PostRegister(ctx *gin.Context) {
 	// 表单验证
 	form := authRegisterForm{}.ShouldBind(ctx)
 
@@ -99,7 +100,7 @@ func (AuthController) PostRegister(ctx *gin.Context) {
 }
 
 // PostLogin 登录
-func (AuthController) PostLogin(ctx *gin.Context) {
+func (AuthCtrl) PostLogin(ctx *gin.Context) {
 	// 表单验证
 	form := authLoginForm{}.ShouldBind(ctx)
 
@@ -139,38 +140,57 @@ func (AuthController) PostLogin(ctx *gin.Context) {
 	}
 }
 
-// GetMenus 获取当前用户菜单
-// func (AuthorizationController) GetMenus(ctx *gin.Context) {
-//	var ret *gorm.GetDb
-//	if accountUuid, exists := ctx.Get(tools.ACCOUNT_OPEN_ID); !exists {
-//		wrongs.ThrowUnLogin("用户未登录")
-//	} else {
-//		// 获取当前用户信息
-//		var account models.AccountModel
-//		ret = models.NewGorm().SetModel(models.AccountModel{}).
-//			SetWheres(map[string]any{"uuid": accountUuid}).
-//			SetPreloads("RbacRoles", "RbacRoles.Menus").
-//			GetDb("",nil).
-//			FindOneUseQuery(&account)
-//		if !wrongs.ThrowWhenIsEmpty(ret, "") {
-//			wrongs.ThrowUnLogin("当前令牌指向用户不存在")
-//		}
-//
-//		var menus []models.MenuModel
-//		models.NewGorm().SetModel(models.MenuModel{}).
-//			GetDb("",nil).
-//			Joins("join pivot_rbac_role_and_menus prram on menus.uuid = prram.menu_uuid").
-//			Joins("join rbac_roles r on prram.rbac_role_uuid = r.uuid").
-//			Joins("join pivot_rbac_role_and_accounts prraa on r.uuid = prraa.rbac_role_uuid").
-//			Joins("join accounts a on prraa.account_uuid = a.uuid").
-//			Where("a.uuid = ?", account.GormModel.Uuid).
-//			Where("menus.deleted_at is null").
-//			Where("menus.parent_uuid = ''").
-//			Order("menus.sort asc").
-//			Order("menus.id asc").
-//			Preload("Subs").
-//			Find(&menus)
-//
-//		ctx.JSON(tools.CorrectInit("", ctx).Datum(map[string]any{"menus": menus}))
-//	}
-// }
+// GetMenus 获取当前账号菜单
+func (AuthCtrl) GetMenus(ctx *gin.Context) {
+	var (
+		account       models.AccountModel
+		rbacMenus     = make([]*models.RbacMenuModel, 0)
+		rbacMenuUuids = make([]string, 0)
+	)
+
+	account = tools.GetAuth(ctx).(models.AccountModel)
+
+	if account.BeAdmin {
+		models.NewRbacMenuModel().GetDb("").Find(&rbacMenus)
+	} else {
+		database.
+			NewGormLauncher().
+			GetConn("").
+			Table("rbac_menus m").
+			Select("distinct row (m.uuid)").
+			Joins("join pivot_rbac_roles__rbac_menus rm on m.uuid = rm.rbac_menu_uuid").
+			Joins("join rbac_roles r on rm.rbac_role_uuid = r.uuid").
+			Joins("join pivot_rbac_roles__accounts ra on r.uuid = ra.rbac_role_uuid").
+			Joins("join accounts a on ra.account_uuid = a.uuid").
+			Where("a.account_uuid =?", account.Uuid).
+			Find(&rbacMenuUuids)
+
+		models.NewRbacMenuModel().GetDb("").Where("uuid in ?", rbacMenuUuids).Find(&rbacMenus)
+	}
+
+	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbac_menus": rbacMenus}).ToGinResponse())
+}
+
+// PutUpdatePassword 修改密码
+func (AuthCtrl) PutUpdatePassword(ctx *gin.Context) {
+	var (
+		ret            *gorm.DB
+		account        *models.AccountModel
+		currentAccount models.AccountModel
+	)
+
+	currentAccount = tools.GetAuth(ctx).(models.AccountModel)
+
+	form := AccountUpdatePasswordForm{}.ShouldBind(ctx)
+
+	ret = models.NewAccountModel().GetDb("").Where("uuid = ?", currentAccount.Uuid).First(&account)
+	wrongs.ThrowWhenEmpty(ret, "用户")
+
+	// 验证密码
+	tools.CheckPassword(form.OldPassword, account.Password)
+
+	account.Password = tools.GeneratePassword(form.Password)
+	models.NewAccountModel().GetDb("").Where("uuid = ?", ctx.Param("uuid")).Save(&account)
+
+	ctx.JSON(tools.NewCorrectWithGinContext("修改成功", ctx).Blank().ToGinResponse())
+}

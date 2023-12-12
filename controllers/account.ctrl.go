@@ -11,8 +11,8 @@ import (
 )
 
 type (
-	// AccountController 用户控制器
-	AccountController struct{}
+	// AccountCtrl 用户控制器
+	AccountCtrl struct{}
 	// AccountStoreForm 新建用户表单
 	AccountStoreForm struct {
 		Username             string   `json:"username"`
@@ -38,9 +38,9 @@ type (
 	}
 )
 
-// NewAccountController 构造函数
-func NewAccountController() *AccountController {
-	return &AccountController{}
+// NewAccountCtrl 构造函数
+func NewAccountCtrl() *AccountCtrl {
+	return &AccountCtrl{}
 }
 
 // ShouldBind 新建用户表单绑定
@@ -93,8 +93,7 @@ func (receiver AccountUpdatePasswordForm) ShouldBind(ctx *gin.Context) AccountUp
 	if ctx.Param("uuid") == "" {
 		wrongs.ThrowValidate("用户编号不能为空")
 	}
-	std := tools.NewStdoutHelper("ok")
-	std.EchoLineDebug(ctx.Request.Method)
+
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -112,7 +111,7 @@ func (receiver AccountUpdatePasswordForm) ShouldBind(ctx *gin.Context) AccountUp
 }
 
 // Store 新建
-func (AccountController) Store(ctx *gin.Context) {
+func (AccountCtrl) Store(ctx *gin.Context) {
 	var (
 		ret    *gorm.DB
 		repeat *models.AccountModel
@@ -149,7 +148,7 @@ func (AccountController) Store(ctx *gin.Context) {
 }
 
 // Delete 删除
-func (AccountController) Delete(ctx *gin.Context) {
+func (AccountCtrl) Delete(ctx *gin.Context) {
 	var (
 		ret     *gorm.DB
 		account models.AccountModel
@@ -172,7 +171,7 @@ func (AccountController) Delete(ctx *gin.Context) {
 }
 
 // Update 编辑
-func (AccountController) Update(ctx *gin.Context) {
+func (AccountCtrl) Update(ctx *gin.Context) {
 	var (
 		ret     *gorm.DB
 		account *models.AccountModel
@@ -206,7 +205,7 @@ func (AccountController) Update(ctx *gin.Context) {
 }
 
 // Detail 详情
-func (AccountController) Detail(ctx *gin.Context) {
+func (AccountCtrl) Detail(ctx *gin.Context) {
 	var (
 		ret     *gorm.DB
 		account models.AccountModel
@@ -218,7 +217,7 @@ func (AccountController) Detail(ctx *gin.Context) {
 }
 
 // List 列表
-func (receiver AccountController) List(ctx *gin.Context) {
+func (receiver AccountCtrl) List(ctx *gin.Context) {
 	var accounts []models.AccountModel
 
 	ctx.JSON(
@@ -234,7 +233,7 @@ func (receiver AccountController) List(ctx *gin.Context) {
 }
 
 // ListJdt jquery-dataTable分页列表
-func (receiver AccountController) ListJdt(ctx *gin.Context) {
+func (receiver AccountCtrl) ListJdt(ctx *gin.Context) {
 	var accounts []models.AccountModel
 
 	ctx.JSON(
@@ -250,7 +249,7 @@ func (receiver AccountController) ListJdt(ctx *gin.Context) {
 }
 
 // PutUpdatePassword 修改密码
-func (recevier AccountController) PutUpdatePassword(ctx *gin.Context) {
+func (recevier AccountCtrl) PutUpdatePassword(ctx *gin.Context) {
 	var (
 		ret     *gorm.DB
 		account *models.AccountModel

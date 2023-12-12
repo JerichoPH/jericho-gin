@@ -12,16 +12,16 @@ import (
 )
 
 type (
-	// RbacRoleController 角色控制器
-	RbacRoleController struct{}
+	// RbacRoleCtrl 角色控制器
+	RbacRoleCtrl struct{}
 
 	// RbacRoleStoreForm 角色表单
 	RbacRoleStoreForm struct {
 		Name string `json:"name"`
 	}
 
-	// RbacPermissionController 权限控制器
-	RbacPermissionController struct{}
+	// RbacPermissionCtrl 权限控制器
+	RbacPermissionCtrl struct{}
 
 	// RbacPermissionStoreForm 权限表单
 	RbacPermissionStoreForm struct {
@@ -32,8 +32,8 @@ type (
 		rbacRoles     []*models.RbacRoleModel
 	}
 
-	// RbacMenuController 菜单控制器
-	RbacMenuController struct{}
+	// RbacMenuCtrl 菜单控制器
+	RbacMenuCtrl struct{}
 
 	// RbacMenuStoreForm 菜单表单
 	RbacMenuStoreForm struct {
@@ -109,13 +109,13 @@ func (receiver RbacMenuStoreForm) ShouldBind(ctx *gin.Context) RbacMenuStoreForm
 	return receiver
 }
 
-// NewRbacRoleController 构造函数
-func NewRbacRoleController() *RbacRoleController {
-	return &RbacRoleController{}
+// NewRbacRoleCtrl 构造函数
+func NewRbacRoleCtrl() *RbacRoleCtrl {
+	return &RbacRoleCtrl{}
 }
 
 // Store 新建
-func (RbacRoleController) Store(ctx *gin.Context) {
+func (RbacRoleCtrl) Store(ctx *gin.Context) {
 	var (
 		ret    *gorm.DB
 		repeat models.RbacRoleModel
@@ -146,7 +146,7 @@ func (RbacRoleController) Store(ctx *gin.Context) {
 }
 
 // Delete 删除
-func (RbacRoleController) Delete(ctx *gin.Context) {
+func (RbacRoleCtrl) Delete(ctx *gin.Context) {
 	var (
 		ret      *gorm.DB
 		rbacRole models.RbacRoleModel
@@ -171,7 +171,7 @@ func (RbacRoleController) Delete(ctx *gin.Context) {
 }
 
 // Update 编辑
-func (RbacRoleController) Update(ctx *gin.Context) {
+func (RbacRoleCtrl) Update(ctx *gin.Context) {
 	var (
 		ret              *gorm.DB
 		rbacRole, repeat models.RbacRoleModel
@@ -207,7 +207,7 @@ func (RbacRoleController) Update(ctx *gin.Context) {
 }
 
 // Detail 详情
-func (RbacRoleController) Detail(ctx *gin.Context) {
+func (RbacRoleCtrl) Detail(ctx *gin.Context) {
 	var (
 		ret      *gorm.DB
 		rbacRole models.RbacRoleModel
@@ -223,7 +223,7 @@ func (RbacRoleController) Detail(ctx *gin.Context) {
 }
 
 // List 列表
-func (receiver RbacRoleController) List(ctx *gin.Context) {
+func (receiver RbacRoleCtrl) List(ctx *gin.Context) {
 	var rbacRoles []*models.RbacRoleModel
 
 	ctx.JSON(
@@ -240,7 +240,7 @@ func (receiver RbacRoleController) List(ctx *gin.Context) {
 }
 
 // ListJdt jquery-dataTable后端分页数据
-func (receiver RbacRoleController) ListJdt(ctx *gin.Context) {
+func (receiver RbacRoleCtrl) ListJdt(ctx *gin.Context) {
 	var rbacRoles []*models.RbacRoleModel
 
 	ctx.JSON(
@@ -256,13 +256,13 @@ func (receiver RbacRoleController) ListJdt(ctx *gin.Context) {
 	)
 }
 
-// NewRbacPermissionController 构造函数
-func NewRbacPermissionController() *RbacPermissionController {
-	return &RbacPermissionController{}
+// NewRbacPermissionCtrl 构造函数
+func NewRbacPermissionCtrl() *RbacPermissionCtrl {
+	return &RbacPermissionCtrl{}
 }
 
 // Store 新建
-func (RbacPermissionController) Store(ctx *gin.Context) {
+func (RbacPermissionCtrl) Store(ctx *gin.Context) {
 	var (
 		ret    *gorm.DB
 		repeat models.RbacPermissionModel
@@ -298,7 +298,7 @@ func (RbacPermissionController) Store(ctx *gin.Context) {
 }
 
 // Delete 删除
-func (RbacPermissionController) Delete(ctx *gin.Context) {
+func (RbacPermissionCtrl) Delete(ctx *gin.Context) {
 	var (
 		ret            *gorm.DB
 		rbacPermission models.RbacPermissionModel
@@ -323,7 +323,7 @@ func (RbacPermissionController) Delete(ctx *gin.Context) {
 }
 
 // Update 编辑
-func (RbacPermissionController) Update(ctx *gin.Context) {
+func (RbacPermissionCtrl) Update(ctx *gin.Context) {
 	var (
 		ret                    *gorm.DB
 		rbacPermission, repeat *models.RbacPermissionModel
@@ -364,7 +364,7 @@ func (RbacPermissionController) Update(ctx *gin.Context) {
 }
 
 // Detail 详情
-func (RbacPermissionController) Detail(ctx *gin.Context) {
+func (RbacPermissionCtrl) Detail(ctx *gin.Context) {
 	var (
 		ret            *gorm.DB
 		rbacPermission models.RbacPermissionModel
@@ -380,7 +380,7 @@ func (RbacPermissionController) Detail(ctx *gin.Context) {
 }
 
 // List 列表
-func (receiver RbacPermissionController) List(ctx *gin.Context) {
+func (receiver RbacPermissionCtrl) List(ctx *gin.Context) {
 	var rbacPermissions []*models.RbacPermissionModel
 
 	ctx.JSON(
@@ -397,7 +397,7 @@ func (receiver RbacPermissionController) List(ctx *gin.Context) {
 }
 
 // ListJdt jquery-dataTable后端分页数据
-func (receiver RbacPermissionController) ListJdt(ctx *gin.Context) {
+func (receiver RbacPermissionCtrl) ListJdt(ctx *gin.Context) {
 	var rbacPermissions []*models.RbacPermissionModel
 
 	ctx.JSON(
@@ -413,13 +413,13 @@ func (receiver RbacPermissionController) ListJdt(ctx *gin.Context) {
 	)
 }
 
-// NewRbacMenuController 构造函数
-func NewRbacMenuController() *RbacMenuController {
-	return &RbacMenuController{}
+// NewRbacMenuCtrl 构造函数
+func NewRbacMenuCtrl() *RbacMenuCtrl {
+	return &RbacMenuCtrl{}
 }
 
 // Store 新建
-func (RbacMenuController) Store(ctx *gin.Context) {
+func (RbacMenuCtrl) Store(ctx *gin.Context) {
 	var (
 		ret    *gorm.DB
 		repeat *models.RbacMenuModel
@@ -458,7 +458,7 @@ func (RbacMenuController) Store(ctx *gin.Context) {
 }
 
 // Delete 删除
-func (RbacMenuController) Delete(ctx *gin.Context) {
+func (RbacMenuCtrl) Delete(ctx *gin.Context) {
 	var (
 		ret      *gorm.DB
 		rbacMenu *models.RbacMenuModel
@@ -489,7 +489,7 @@ func (RbacMenuController) Delete(ctx *gin.Context) {
 }
 
 // Update 编辑
-func (RbacMenuController) Update(ctx *gin.Context) {
+func (RbacMenuCtrl) Update(ctx *gin.Context) {
 	var (
 		ret              *gorm.DB
 		rbacMenu, repeat *models.RbacMenuModel
@@ -547,7 +547,7 @@ func (RbacMenuController) Update(ctx *gin.Context) {
 }
 
 // Detail 详情
-func (RbacMenuController) Detail(ctx *gin.Context) {
+func (RbacMenuCtrl) Detail(ctx *gin.Context) {
 	var (
 		ret      *gorm.DB
 		rbacMenu models.RbacMenuModel
@@ -563,7 +563,7 @@ func (RbacMenuController) Detail(ctx *gin.Context) {
 }
 
 // List 列表
-func (receiver RbacMenuController) List(ctx *gin.Context) {
+func (receiver RbacMenuCtrl) List(ctx *gin.Context) {
 	var rbacMenus []*models.RbacMenuModel
 
 	ctx.JSON(
@@ -580,7 +580,7 @@ func (receiver RbacMenuController) List(ctx *gin.Context) {
 }
 
 // ListJdt jquery-dataTable后端分页数据
-func (receiver RbacMenuController) ListJdt(ctx *gin.Context) {
+func (receiver RbacMenuCtrl) ListJdt(ctx *gin.Context) {
 	var rbacMenus []*models.RbacMenuModel
 
 	ctx.JSON(

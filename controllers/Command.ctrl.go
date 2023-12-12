@@ -10,16 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CommandController 控制台控制器
-type CommandController struct{}
+// CommandCtrl 控制台控制器
+type CommandCtrl struct{}
 
-// NewCommandController 构造函数
-func NewCommandController() *CommandController {
-	return &CommandController{}
+// NewCommandCtrl 构造函数
+func NewCommandCtrl() *CommandCtrl {
+	return &CommandCtrl{}
 }
 
 // ExcelHelperDemo 列表
-func (receiver CommandController) ExcelHelperDemo(ctx *gin.Context) {
+func (receiver CommandCtrl) ExcelHelperDemo(ctx *gin.Context) {
 	dir := os.Getenv("PWD")
 	operation := ctx.Query("operation")
 	excelName := ctx.Query("excel_name")
@@ -68,5 +68,5 @@ func (receiver CommandController) ExcelHelperDemo(ctx *gin.Context) {
 }
 
 // InitData 初始化数据
-func (receiver CommandController) InitData(ctx *gin.Context) {
+func (receiver CommandCtrl) InitData(ctx *gin.Context) {
 }

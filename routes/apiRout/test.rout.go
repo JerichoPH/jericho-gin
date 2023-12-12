@@ -1,4 +1,4 @@
-package apiRoute
+package apiRout
 
 import (
 	"jericho-gin/controllers"
@@ -6,16 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TestRouter 路由
-type TestRouter struct{}
+// TestRout 路由
+type TestRout struct{}
 
-// NewTestRouter 构造函数
-func NewTestRouter() TestRouter {
-	return TestRouter{}
+// NewTestRout 构造函数
+func NewTestRout() TestRout {
+	return TestRout{}
 }
 
 // Load 加载路由
-func (TestRouter) Load(engine *gin.Engine) {
+func (TestRout) Load(engine *gin.Engine) {
 	r := engine.Group(
 		"api/test",
 		// middlewares.CheckAuthorization(),
