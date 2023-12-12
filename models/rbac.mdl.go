@@ -2,13 +2,16 @@ package models
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"jericho-gin/database"
 	"jericho-gin/wrongs"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type (
+	// RbacRoleModel 角色模型
 	RbacRoleModel struct {
 		MySqlModel
 		Name            string                 `gorm:"type:varchar(64);not null;comment:角色名称;" json:"name"`
@@ -17,14 +20,18 @@ type (
 		RbacMenus       []*RbacMenuModel       `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_role_uuid;references:uuid;joinReferences:rbacMenuUuid;" json:"rbac_menus"`
 	}
 
+	// RbacPermissionModel 权限模型
 	RbacPermissionModel struct {
 		MySqlModel
-		Name        string           `gorm:"type:varchar(64);not null;comment:权限名称;" json:"name"`
-		Description *string          `gorm:"type:text;comment:权限描述;" json:"description"`
-		Uri         string           `gorm:"type:varchar(255);not null;default:'';comment:权限所属路由;" json:"uri"`
-		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_permissions;foreignKey:uuid;joinForeignKey:rbac_permission_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
+		Name                    string           `gorm:"type:varchar(64);not null;comment:权限名称;" json:"name"`
+		Description             *string          `gorm:"type:text;comment:权限描述;" json:"description"`
+		Uri                     string           `gorm:"type:varchar(255);not null;default:'';comment:权限所属路由;" json:"uri"`
+		Method                  string           `gorm:"type:varchar(32);not null;comment:请求方法;" json:"method"`
+		RbacPermissionGroupUuid string           `gorm:"type:varchar(36);not null;default:'';comment:所属权限组uuid;" json:"rbac_permission_group_uuid"`
+		RbacRoles               []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_permissions;foreignKey:uuid;joinForeignKey:rbac_permission_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
 	}
 
+	// RbacMenuModel 菜单模型
 	RbacMenuModel struct {
 		MySqlModel
 		Name        string           `gorm:"type:varchar(64);not null;comment:菜单名称" json:"name"`
@@ -183,7 +190,7 @@ func (receiver RbacMenuModel) GetListByQuery(ctx *gin.Context) *gorm.DB {
 
 // GetSubUuidsByParentUuid 根据父级uuid获取所有子集uuid
 func (receiver RbacMenuModel) GetSubUuidsByParentUuid(parentUuid string) map[string]map[string]string {
-	if rows := database.ExecSql([]string{
+	if rows := database.ExecSql(strings.Join([]string{
 		"WITH RECURSIVE cte AS (",
 		"SELECT uuid, name, NULL AS parent_uuid",
 		"FROM rbac_menus",
@@ -195,7 +202,7 @@ func (receiver RbacMenuModel) GetSubUuidsByParentUuid(parentUuid string) map[str
 		"WHERE m.deleted_at IS NULL",
 		")",
 		"SELECT uuid, name FROM cte",
-	}, []any{parentUuid}); rows != nil {
+	}, "\r\n"), parentUuid); rows != nil {
 		var (
 			subs = make(map[string]map[string]string)
 			err  error

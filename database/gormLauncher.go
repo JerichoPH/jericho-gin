@@ -6,7 +6,6 @@ import (
 	"jericho-gin/settings"
 	"jericho-gin/wrongs"
 	"os"
-	"strings"
 
 	"gorm.io/gorm"
 )
@@ -103,10 +102,10 @@ func (receiver *GormLauncher) NewConn(dbConnName string) (dbSession *gorm.DB) {
 }
 
 // ExecSql 执行sql语句
-func ExecSql(sqlList []string, params []any) *sql.Rows {
+func ExecSql(sql string, params ...any) *sql.Rows {
 	if rows, err := NewGormLauncher().
 		GetConn("").
-		Raw(strings.Join(sqlList, "\r\n"), params...).
+		Raw(sql, params...).
 		Rows(); err != nil {
 		wrongs.ThrowForbidden(err.Error())
 	} else {
