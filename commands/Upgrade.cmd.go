@@ -71,10 +71,10 @@ func (UpgradeCmd) init() []string {
 	database.ExecSql("truncate table rbac_menus")
 	std.EchoLineSuccess("截断菜单表成功")
 	for _, rbacMenuDatum := range []map[string]string{
-		{"name": "用户列表", "uri": "/account", "icon": "fa fa-list"},
-		{"name": "角色列表", "uri": "/rbac/role", "icon": "fa fa-list"},
-		{"name": "权限列表", "uri": "/rbac/permission", "icon": "fa fa-list"},
-		{"name": "菜单列表", "uri": "/rbac/menu", "icon": "fa fa-list"},
+		{"name": "用户列表", "uri": "/account", "icon": "fa fa-list", "page_route_name": "acocunt:index"},
+		{"name": "角色列表", "uri": "/rbac/role", "icon": "fa fa-list", "page_route_name": "rbacRole:index"},
+		{"name": "权限列表", "uri": "/rbac/permission", "icon": "fa fa-list", "page_route_name": "rbacPermission"},
+		{"name": "菜单列表", "uri": "/rbac/menu", "icon": "fa fa-list", "page_route_name": "rbacMenu:index"},
 	} {
 		rbacMenus = append(rbacMenus, &models.RbacMenuModel{
 			Name: rbacMenuDatum["name"],

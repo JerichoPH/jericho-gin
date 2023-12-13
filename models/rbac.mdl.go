@@ -34,15 +34,16 @@ type (
 	// RbacMenuModel 菜单模型
 	RbacMenuModel struct {
 		MySqlModel
-		Name        string           `gorm:"type:varchar(64);not null;comment:菜单名称" json:"name"`
-		SubTitle    string           `gorm:"type:varchar(128);not null;default:'';comment:菜单副标题" json:"sub_title"`
-		Description *string          `gorm:"type:text;comment:菜单描述" json:"description"`
-		Uri         string           `gorm:"type:varchar(128);not null;default:'';comment:菜单所属路由" json:"uri"`
-		Icon        string           `gorm:"type:varchar(64);not null;default:'';comment:菜单图标" json:"icon"`
-		RbacRoles   []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
-		ParentUuid  string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parent_uuid"`
-		Parent      *RbacMenuModel   `gorm:"foreignKey:parent_uuid;references:uuid;comment:所属父级;" json:"parent"`
-		Subs        []*RbacMenuModel `gorm:"foreignKey:parent_uuid;references:uuid;comment:相关子集;" json:"subs"`
+		Name          string           `gorm:"type:varchar(64);not null;comment:菜单名称" json:"name"`
+		SubTitle      string           `gorm:"type:varchar(128);not null;default:'';comment:菜单副标题" json:"sub_title"`
+		Description   *string          `gorm:"type:text;comment:菜单描述" json:"description"`
+		Uri           string           `gorm:"type:varchar(128);not null;default:'';comment:菜单所属路由" json:"uri"`
+		Icon          string           `gorm:"type:varchar(64);not null;default:'';comment:菜单图标" json:"icon"`
+		PageRouteName string           `gorm:"type:varchar(64);not null;default:'';comment:页面路由名称; json:"page_route_name"`
+		RbacRoles     []*RbacRoleModel `gorm:"many2many:pivot_rbac_roles__rbac_menus;foreignKey:uuid;joinForeignKey:rbac_menu_uuid;references:uuid;joinReferences:rbacRoleUuid;" json:"rbac_roles"`
+		ParentUuid    string           `gorm:"type:varchar(36);not null;default:'';comment:父级uuid;" json:"parent_uuid"`
+		Parent        *RbacMenuModel   `gorm:"foreignKey:parent_uuid;references:uuid;comment:所属父级;" json:"parent"`
+		Subs          []*RbacMenuModel `gorm:"foreignKey:parent_uuid;references:uuid;comment:相关子集;" json:"subs"`
 	}
 
 	PivotRbacRoleAccountModel struct {

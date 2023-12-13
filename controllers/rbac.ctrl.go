@@ -43,6 +43,7 @@ type (
 		Description   string `json:"description"`
 		Uri           string `json:"uri"`
 		Icon          string `json:"icon"`
+		PageRouteName string `json:"page_route_name"`
 		ParentUuid    string `json:"parent_uuid"`
 		parentMenu    *models.RbacMenuModel
 		RbacRoleUuids []string `json:"rbac_role_uuids"`
@@ -440,13 +441,14 @@ func (RbacMenuCtrl) Store(ctx *gin.Context) {
 
 	// 新建
 	rbacMenu := &models.RbacMenuModel{
-		MySqlModel:  models.MySqlModel{Uuid: uuid.NewV4().String()},
-		Name:        form.Name,
-		SubTitle:    form.SubTitle,
-		Description: &form.Description,
-		Uri:         form.Uri,
-		Icon:        form.Icon,
-		ParentUuid:  form.ParentUuid,
+		MySqlModel:    models.MySqlModel{Uuid: uuid.NewV4().String()},
+		Name:          form.Name,
+		SubTitle:      form.SubTitle,
+		Description:   &form.Description,
+		Uri:           form.Uri,
+		Icon:          form.Icon,
+		PageRouteName: form.PageRouteName,
+		ParentUuid:    form.ParentUuid,
 	}
 	if ret = models.NewRbacMenuModel().
 		GetDb("").
@@ -536,6 +538,7 @@ func (RbacMenuCtrl) Update(ctx *gin.Context) {
 	rbacMenu.Description = &form.Description
 	rbacMenu.Icon = form.Icon
 	rbacMenu.Uri = form.Uri
+	rbacMenu.PageRouteName = form.PageRouteName
 	rbacMenu.ParentUuid = form.ParentUuid
 	if ret = models.NewRbacMenuModel().
 		GetDb("").
