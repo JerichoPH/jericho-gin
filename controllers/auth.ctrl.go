@@ -14,15 +14,15 @@ import (
 type (
 	// AuthCtrl 权鉴控制器
 	AuthCtrl struct{}
-	// authRegisterForm 注册表单
-	authRegisterForm struct {
+	// AuthRegisterForm 注册表单
+	AuthRegisterForm struct {
 		Username             string `json:"username" binding:"required"`
 		Password             string `json:"password" binding:"required"`
-		PasswordConfirmation string `json:"passwordConfirmation" binding:"required"`
+		PasswordConfirmation string `json:"password_confirmation" binding:"required"`
 		Nickname             string `json:"nickname" binding:"required"`
 	}
-	// authLoginForm 登录表单
-	authLoginForm struct {
+	// AuthLoginForm 登录表单
+	AuthLoginForm struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
@@ -34,7 +34,7 @@ func NewAuthCtrl() *AuthCtrl {
 }
 
 // ShouldBind 绑定表单（注册）
-func (receiver authRegisterForm) ShouldBind(ctx *gin.Context) authRegisterForm {
+func (receiver AuthRegisterForm) ShouldBind(ctx *gin.Context) AuthRegisterForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -55,7 +55,7 @@ func (receiver authRegisterForm) ShouldBind(ctx *gin.Context) authRegisterForm {
 }
 
 // ShouldBind 绑定表单（登陆）
-func (receiver authLoginForm) ShouldBind(ctx *gin.Context) authLoginForm {
+func (receiver AuthLoginForm) ShouldBind(ctx *gin.Context) AuthLoginForm {
 	if err := ctx.ShouldBind(&receiver); err != nil {
 		wrongs.ThrowValidate(err.Error())
 	}
@@ -75,7 +75,7 @@ func (receiver authLoginForm) ShouldBind(ctx *gin.Context) authLoginForm {
 // PostRegister 注册
 func (AuthCtrl) PostRegister(ctx *gin.Context) {
 	// 表单验证
-	form := authRegisterForm{}.ShouldBind(ctx)
+	form := AuthRegisterForm{}.ShouldBind(ctx)
 
 	// 检查重复项（用户名）
 	var repeat models.AccountModel
@@ -102,7 +102,7 @@ func (AuthCtrl) PostRegister(ctx *gin.Context) {
 // PostLogin 登录
 func (AuthCtrl) PostLogin(ctx *gin.Context) {
 	// 表单验证
-	form := authLoginForm{}.ShouldBind(ctx)
+	form := AuthLoginForm{}.ShouldBind(ctx)
 
 	var (
 		account models.AccountModel

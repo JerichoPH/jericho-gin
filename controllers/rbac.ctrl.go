@@ -28,6 +28,7 @@ type (
 		Name          string   `json:"name"`
 		Description   string   `json:"description"`
 		Uri           string   `json:"uri"`
+		Icon          string   `json:"icon"`
 		RbacRoleUuids []string `json:"rbac_role_uuids"`
 		rbacRoles     []*models.RbacRoleModel
 	}
@@ -41,6 +42,7 @@ type (
 		SubTitle      string `json:"sub_title"`
 		Description   string `json:"description"`
 		Uri           string `json:"uri"`
+		Icon          string `json:"icon"`
 		ParentUuid    string `json:"parent_uuid"`
 		parentMenu    *models.RbacMenuModel
 		RbacRoleUuids []string `json:"rbac_role_uuids"`
@@ -443,6 +445,7 @@ func (RbacMenuCtrl) Store(ctx *gin.Context) {
 		SubTitle:    form.SubTitle,
 		Description: &form.Description,
 		Uri:         form.Uri,
+		Icon:        form.Icon,
 		ParentUuid:  form.ParentUuid,
 	}
 	if ret = models.NewRbacMenuModel().
@@ -531,6 +534,7 @@ func (RbacMenuCtrl) Update(ctx *gin.Context) {
 	rbacMenu.Name = form.Name
 	rbacMenu.SubTitle = form.SubTitle
 	rbacMenu.Description = &form.Description
+	rbacMenu.Icon = form.Icon
 	rbacMenu.Uri = form.Uri
 	rbacMenu.ParentUuid = form.ParentUuid
 	if ret = models.NewRbacMenuModel().
