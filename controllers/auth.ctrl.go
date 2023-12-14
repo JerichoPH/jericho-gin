@@ -151,7 +151,7 @@ func (AuthCtrl) GetMenus(ctx *gin.Context) {
 	account = tools.GetAuth(ctx).(models.AccountModel)
 
 	if account.BeAdmin {
-		models.NewRbacMenuModel().GetDb("").Find(&rbacMenus)
+		models.NewRbacMenuModel().SetCtx(ctx).GetDbUseQuery("").Find(&rbacMenus)
 	} else {
 		database.
 			NewGormLauncher().
@@ -165,7 +165,7 @@ func (AuthCtrl) GetMenus(ctx *gin.Context) {
 			Where("a.account_uuid =?", account.Uuid).
 			Find(&rbacMenuUuids)
 
-		models.NewRbacMenuModel().GetDb("").Where("uuid in ?", rbacMenuUuids).Find(&rbacMenus)
+		models.NewRbacMenuModel().SetCtx(ctx).GetDbUseQuery("").Where("uuid in ?", rbacMenuUuids).Find(&rbacMenus)
 	}
 
 	ctx.JSON(tools.NewCorrectWithGinContext("", ctx).Datum(map[string]any{"rbac_menus": rbacMenus}).ToGinResponse())

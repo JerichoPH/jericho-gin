@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"jericho-gin/database"
-	"jericho-gin/tools"
 	"jericho-gin/wrongs"
 	"strconv"
 	"strings"
@@ -618,10 +617,8 @@ func (receiver *MySqlModel) GetDbUseQuery(dbConnName string) *gorm.DB {
 	}
 
 	// 自主拼接preload
-	std := tools.NewStdoutHelper("OK")
 	if preloads, exist := receiver.ctx.GetQueryArray("__preloads__[]"); exist {
 		for _, preload := range preloads {
-			std.EchoLineDebug(preload)
 			dbSession = dbSession.Preload(preload)
 		}
 	}
